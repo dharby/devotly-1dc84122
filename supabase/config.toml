@@ -1,0 +1,4 @@
+project_id = "zbfabbbkbqmhwiijvlgc"
+
+[functions.generate-devotional]
+verify_jwt = false

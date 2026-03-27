@@ -140,3 +140,36 @@
     box-shadow: 0 8px 30px -8px hsl(38 65% 50% / 0.25);
   }
 }
+
+/* Font family overrides */
+[data-font="sans"] body,
+[data-font="sans"] h1, [data-font="sans"] h2, [data-font="sans"] h3,
+[data-font="sans"] h4, [data-font="sans"] h5, [data-font="sans"] h6,
+[data-font="sans"] .font-display {
+  font-family: 'Inter', system-ui, sans-serif !important;
+}
+
+[data-font="mono"] body,
+[data-font="mono"] h1, [data-font="mono"] h2, [data-font="mono"] h3,
+[data-font="mono"] h4, [data-font="mono"] h5, [data-font="mono"] h6,
+[data-font="mono"] .font-display {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+}
+
+/* Font size overrides */
+[data-font-size="sm"] body { font-size: 14px; }
+[data-font-size="md"] body { font-size: 16px; }
+[data-font-size="lg"] body { font-size: 18px; }
+[data-font-size="xl"] body { font-size: 20px; }
+
+/* Focus/Reading mode */
+.focus-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow-y: auto;
+  background: hsl(var(--background));
+}
+.dark .focus-mode {
+  background: hsl(25, 20%, 8%);
+}

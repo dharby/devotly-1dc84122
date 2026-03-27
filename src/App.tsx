@@ -9,6 +9,9 @@ import GenerateDevotional from "./pages/GenerateDevotional";
 import Tracker from "./pages/Tracker";
 import SavedDevotionals from "./pages/SavedDevotionals";
 import Family from "./pages/Family";
+import Settings from "./pages/Settings";
+import PrayerTimer from "./pages/PrayerTimer";
+import FastingTracker from "./pages/FastingTracker";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +28,9 @@ const App = () => (
           <Route path="/tracker" element={<Tracker />} />
           <Route path="/saved" element={<SavedDevotionals />} />
           <Route path="/family" element={<Family />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/prayer-timer" element={<PrayerTimer />} />
+          <Route path="/fasting" element={<FastingTracker />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <BottomNav />
