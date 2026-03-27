@@ -4,9 +4,11 @@ import { Sparkles, RefreshCw, Bookmark, CheckCircle2, ChevronLeft, BookOpen, Max
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Devotional,
-  generateSampleDevotional,
+  generateId,
   saveDevotional,
   markDayComplete,
 } from "@/lib/devotionalStore";
@@ -29,16 +31,39 @@ const GenerateDevotional = () => {
   const [completed, setCompleted] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!topic.trim()) return;
     setIsGenerating(true);
     setSaved(false);
     setCompleted(false);
-    setTimeout(() => {
-      const dev = generateSampleDevotional(topic.trim(), tone);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-devotional", {
+        body: { topic: topic.trim(), tone },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      const dev: Devotional = {
+        id: generateId(),
+        title: data.title || "Daily Devotional",
+        topic: topic.trim(),
+        tone,
+        scripture: data.scripture || "",
+        scriptureReference: data.scriptureReference || "",
+        greekLatinInsights: data.greekLatinInsights,
+        reflection: data.reflection || "",
+        prayer: data.prayer || "",
+        declaration: data.declaration,
+        createdAt: new Date().toISOString(),
+        completed: false,
+        saved: false,
+      };
       setDevotional(dev);
+    } catch (err: any) {
+      console.error("Generation error:", err);
+      toast.error(err.message || "Failed to generate devotional. Please try again.");
+    } finally {
       setIsGenerating(false);
-    }, 1500);
+    }
   };
 
   const handleSave = () => {
