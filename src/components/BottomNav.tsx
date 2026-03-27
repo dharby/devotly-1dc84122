@@ -1,13 +1,13 @@
-import { Home, BookOpen, Calendar, Bookmark, Users } from "lucide-react";
+import { Home, BookOpen, Calendar, Timer, Settings } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: BookOpen, label: "Devotion", path: "/generate" },
+  { icon: Timer, label: "Prayer", path: "/prayer-timer" },
   { icon: Calendar, label: "Tracker", path: "/tracker" },
-  { icon: Bookmark, label: "Saved", path: "/saved" },
-  { icon: Users, label: "Family", path: "/family" },
+  { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 const BottomNav = () => {
