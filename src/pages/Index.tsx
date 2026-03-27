@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Flame, Calendar, ArrowRight, Sparkles } from "lucide-react";
+import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCurrentStreak, getDevotionals, getTrackerDays } from "@/lib/devotionalStore";
 import heroImage from "@/assets/hero-devotional.jpg";
@@ -15,27 +15,17 @@ const Index = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt="Peaceful devotional scene"
-            className="w-full h-full object-cover"
-          />
+          <img src={heroImage} alt="Peaceful devotional scene" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
         </div>
         <div className="relative px-6 pt-14 pb-10">
           <p className="text-sm font-medium text-muted-foreground mb-1">
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
+            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
           <h1 className="font-display text-3xl font-bold tracking-tight mb-2">
             Good {getGreeting()},
           </h1>
-          <p className="text-muted-foreground text-base">
-            Begin your day in God's presence.
-          </p>
+          <p className="text-muted-foreground text-base">Begin your day in God's presence.</p>
         </div>
       </div>
 
@@ -49,7 +39,7 @@ const Index = () => {
       </div>
 
       {/* Main Action */}
-      <div className="px-6 mb-8">
+      <div className="px-6 mb-6">
         <button
           onClick={() => navigate("/generate")}
           className="w-full bg-gradient-golden rounded-2xl p-6 shadow-golden text-primary-foreground text-left transition-transform active:scale-[0.98]"
@@ -58,63 +48,62 @@ const Index = () => {
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles className="h-5 w-5" />
-                <span className="text-sm font-semibold uppercase tracking-wider opacity-90">
-                  Today's Devotional
-                </span>
+                <span className="text-sm font-semibold uppercase tracking-wider opacity-90">Today's Devotional</span>
               </div>
-              <h2 className="font-display text-xl font-bold mb-1">
-                Generate a New Devotion
-              </h2>
-              <p className="text-sm opacity-80">
-                Enter any topic and receive a Spirit-led devotional
-              </p>
+              <h2 className="font-display text-xl font-bold mb-1">Generate a New Devotion</h2>
+              <p className="text-sm opacity-80">Enter any topic and receive a Spirit-led devotional</p>
             </div>
             <ArrowRight className="h-6 w-6 mt-1 flex-shrink-0" />
           </div>
         </button>
       </div>
 
+      {/* Quick Actions */}
+      <div className="px-6 mb-6">
+        <div className="grid grid-cols-3 gap-2">
+          <button onClick={() => navigate("/prayer-timer")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
+            <Timer className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Prayer</p>
+          </button>
+          <button onClick={() => navigate("/fasting")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
+            <UtensilsCrossed className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Fasting</p>
+          </button>
+          <button onClick={() => navigate("/family")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
+            <Users className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Family</p>
+          </button>
+        </div>
+      </div>
+
       {/* Quick Topics */}
       <div className="px-6 mb-8">
         <h3 className="font-display text-lg font-semibold mb-3">Quick Topics</h3>
         <div className="flex flex-wrap gap-2">
-          {["Faith", "Love", "Anxiety", "Purpose", "Gratitude", "Marriage", "Peace", "Strength"].map(
-            (topic) => (
-              <Button
-                key={topic}
-                variant="soft"
-                size="sm"
-                className="rounded-full"
-                onClick={() => navigate(`/generate?topic=${topic}`)}
-              >
-                {topic}
-              </Button>
-            )
-          )}
+          {["Faith", "Love", "Anxiety", "Purpose", "Gratitude", "Marriage", "Peace", "Strength"].map((topic) => (
+            <Button key={topic} variant="soft" size="sm" className="rounded-full" onClick={() => navigate(`/generate?topic=${topic}`)}>
+              {topic}
+            </Button>
+          ))}
         </div>
       </div>
 
       {/* Recent Devotionals */}
       <div className="px-6">
-        <h3 className="font-display text-lg font-semibold mb-3">Recent</h3>
-        {getDevotionals()
-          .slice(0, 3)
-          .map((d) => (
-            <div
-              key={d.id}
-              className="bg-card rounded-xl p-4 mb-3 border border-border cursor-pointer hover:shadow-warm transition-shadow"
-              onClick={() => navigate(`/saved`)}
-            >
-              <p className="font-display font-semibold text-sm">{d.title}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {d.scriptureReference} · {new Date(d.createdAt).toLocaleDateString()}
-              </p>
-            </div>
-          ))}
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display text-lg font-semibold">Recent</h3>
+          <button onClick={() => navigate("/saved")} className="text-xs text-primary font-medium flex items-center gap-1">
+            <Bookmark className="h-3 w-3" /> View All
+          </button>
+        </div>
+        {getDevotionals().slice(0, 3).map((d) => (
+          <div key={d.id} className="bg-card rounded-xl p-4 mb-3 border border-border cursor-pointer hover:shadow-warm transition-shadow" onClick={() => navigate("/saved")}>
+            <p className="font-display font-semibold text-sm">{d.title}</p>
+            <p className="text-xs text-muted-foreground mt-1">{d.scriptureReference} · {new Date(d.createdAt).toLocaleDateString()}</p>
+          </div>
+        ))}
         {getDevotionals().length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-6">
-            No devotionals yet. Start your journey today! ✨
-          </p>
+          <p className="text-sm text-muted-foreground text-center py-6">No devotionals yet. Start your journey today! ✨</p>
         )}
       </div>
     </div>
