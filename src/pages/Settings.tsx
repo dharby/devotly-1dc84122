@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { ChevronLeft, Sun, Moon, Monitor, Type, Globe, Bell } from "lucide-react";
+import { ChevronLeft, Sun, Moon, Monitor, Type, Globe, Bell, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { getSettings, updateSettings, type AppSettings } from "@/lib/settingsStore";
+import { useAuth } from "@/hooks/useAuth";
 
 const themes = [
   { value: "light" as const, label: "Light", icon: Sun },
@@ -34,6 +35,7 @@ const languages = [
 ];
 
 const Settings = () => {
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [settings, setSettings] = useState<AppSettings>(getSettings());
 
@@ -179,6 +181,25 @@ const Settings = () => {
                 ? "You'll receive a notification to complete your devotional."
                 : "Turn on to get daily devotional reminders."}
             </p>
+          </div>
+        </section>
+        {/* Account */}
+        <section>
+          <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
+            <LogOut className="h-4 w-4 text-primary" /> Account
+          </h2>
+          <div className="bg-card rounded-xl p-4 border border-border space-y-3">
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            <Button
+              variant="outline"
+              className="w-full rounded-xl"
+              onClick={async () => {
+                await signOut();
+                navigate("/auth");
+              }}
+            >
+              <LogOut className="h-4 w-4 mr-2" /> Sign Out
+            </Button>
           </div>
         </section>
       </div>

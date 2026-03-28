@@ -1,12 +1,54 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users } from "lucide-react";
+import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCurrentStreak, getDevotionals, getTrackerDays } from "@/lib/devotionalStore";
+import { useAuth } from "@/hooks/useAuth";
 import heroImage from "@/assets/hero-devotional.jpg";
+
+const DAILY_TOPICS = [
+  { topic: "God's Faithfulness", verse: "Lamentations 3:22-23" },
+  { topic: "Peace in Storms", verse: "John 14:27" },
+  { topic: "Strength in Weakness", verse: "2 Corinthians 12:9" },
+  { topic: "Walking in Love", verse: "1 John 4:7-8" },
+  { topic: "Trusting God's Plan", verse: "Jeremiah 29:11" },
+  { topic: "Joy of the Lord", verse: "Nehemiah 8:10" },
+  { topic: "Forgiveness", verse: "Colossians 3:13" },
+  { topic: "Hope in Christ", verse: "Romans 15:13" },
+  { topic: "Patience & Endurance", verse: "James 1:2-4" },
+  { topic: "God's Provision", verse: "Philippians 4:19" },
+  { topic: "Identity in Christ", verse: "2 Corinthians 5:17" },
+  { topic: "Gratitude", verse: "1 Thessalonians 5:18" },
+  { topic: "Courage", verse: "Joshua 1:9" },
+  { topic: "Grace", verse: "Ephesians 2:8-9" },
+  { topic: "Renewed Mind", verse: "Romans 12:2" },
+  { topic: "Humility", verse: "Philippians 2:3-4" },
+  { topic: "Compassion", verse: "Colossians 3:12" },
+  { topic: "Purpose", verse: "Ephesians 2:10" },
+  { topic: "Obedience", verse: "John 14:15" },
+  { topic: "Wisdom", verse: "James 1:5" },
+  { topic: "Rest in God", verse: "Matthew 11:28-30" },
+  { topic: "Overcoming Fear", verse: "2 Timothy 1:7" },
+  { topic: "Generosity", verse: "2 Corinthians 9:7" },
+  { topic: "The Holy Spirit", verse: "John 16:13" },
+  { topic: "Contentment", verse: "Philippians 4:11-12" },
+  { topic: "Worship", verse: "Psalm 95:1-2" },
+  { topic: "Prayer Life", verse: "Philippians 4:6-7" },
+  { topic: "God's Sovereignty", verse: "Isaiah 46:10" },
+  { topic: "Healing", verse: "Psalm 147:3" },
+  { topic: "Perseverance", verse: "Galatians 6:9" },
+  { topic: "Spiritual Armor", verse: "Ephesians 6:11" },
+];
+
+function getDailySuggestion() {
+  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
+  return DAILY_TOPICS[dayOfYear % DAILY_TOPICS.length];
+}
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const streak = getCurrentStreak();
+  const dailySuggestion = getDailySuggestion();
   const totalDevotionals = getDevotionals().length;
   const completedDays = getTrackerDays().filter((d) => d.completed).length;
 
@@ -23,7 +65,7 @@ const Index = () => {
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
           <h1 className="font-display text-3xl font-bold tracking-tight mb-2">
-            Good {getGreeting()},
+            Good {getGreeting()}{user?.email ? `, ${user.email.split("@")[0]}` : ""},
           </h1>
           <p className="text-muted-foreground text-base">Begin your day in God's presence.</p>
         </div>
@@ -74,6 +116,26 @@ const Index = () => {
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Family</p>
           </button>
         </div>
+      </div>
+
+      {/* Daily Suggestion */}
+      <div className="px-6 mb-6">
+        <button
+          onClick={() => navigate(`/generate?topic=${encodeURIComponent(dailySuggestion.topic)}`)}
+          className="w-full bg-accent rounded-2xl p-5 border border-border text-left transition-transform active:scale-[0.98] hover:shadow-warm"
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+              <Lightbulb className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Today's Suggested Topic</p>
+              <p className="font-display text-base font-bold">{dailySuggestion.topic}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{dailySuggestion.verse}</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground mt-1" />
+          </div>
+        </button>
       </div>
 
       {/* Quick Topics */}
