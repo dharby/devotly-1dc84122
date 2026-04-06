@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Devotional, generateId } from "@/lib/devotionalStore";
+import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
 import DevotionalReader from "@/components/DevotionalReader";
 
 const tones = [
@@ -23,6 +23,7 @@ const GenerateDevotional = () => {
   const [tone, setTone] = useState<Devotional["tone"]>("personal");
   const [devotional, setDevotional] = useState<Devotional | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { saveDevotional } = useDevotionals();
 
   const handleGenerate = async () => {
     if (!topic.trim()) return;
@@ -34,7 +35,7 @@ const GenerateDevotional = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       const dev: Devotional = {
-        id: generateId(),
+        id: crypto.randomUUID(),
         title: data.title || "Daily Devotional",
         topic: topic.trim(),
         tone,
@@ -48,6 +49,8 @@ const GenerateDevotional = () => {
         completed: false,
         saved: false,
       };
+      // Save to cloud immediately
+      await saveDevotional(dev);
       setDevotional(dev);
     } catch (err: any) {
       console.error("Generation error:", err);
@@ -59,7 +62,6 @@ const GenerateDevotional = () => {
 
   return (
     <div className="min-h-screen pb-24">
-      {/* Header */}
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="text-muted-foreground">
