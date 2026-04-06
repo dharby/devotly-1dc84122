@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCurrentStreak, getDevotionals, getTrackerDays } from "@/lib/devotionalStore";
+import { useDevotionals } from "@/hooks/useDevotionals";
+import { useTracker } from "@/hooks/useTracker";
 import { useAuth } from "@/hooks/useAuth";
 import heroImage from "@/assets/hero-devotional.jpg";
 
@@ -47,10 +48,11 @@ function getDailySuggestion() {
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const streak = getCurrentStreak();
+  const { devotionals } = useDevotionals();
+  const { streak, trackerDays } = useTracker();
   const dailySuggestion = getDailySuggestion();
-  const totalDevotionals = getDevotionals().length;
-  const completedDays = getTrackerDays().filter((d) => d.completed).length;
+  const totalDevotionals = devotionals.length;
+  const completedDays = trackerDays.filter((d) => d.completed).length;
 
   return (
     <div className="min-h-screen pb-24">
@@ -158,13 +160,13 @@ const Index = () => {
             <Bookmark className="h-3 w-3" /> View All
           </button>
         </div>
-        {getDevotionals().slice(0, 3).map((d) => (
+        {devotionals.slice(0, 3).map((d) => (
           <div key={d.id} className="bg-card rounded-xl p-4 mb-3 border border-border cursor-pointer hover:shadow-warm transition-shadow" onClick={() => navigate("/saved")}>
             <p className="font-display font-semibold text-sm">{d.title}</p>
             <p className="text-xs text-muted-foreground mt-1">{d.scriptureReference} · {new Date(d.createdAt).toLocaleDateString()}</p>
           </div>
         ))}
-        {getDevotionals().length === 0 && (
+        {devotionals.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-6">No devotionals yet. Start your journey today! ✨</p>
         )}
       </div>

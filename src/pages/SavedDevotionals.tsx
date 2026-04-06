@@ -1,20 +1,17 @@
 import { useState } from "react";
-import { BookOpen, Bookmark, Trash2 } from "lucide-react";
-import { getDevotionals, Devotional, saveDevotional } from "@/lib/devotionalStore";
+import { BookOpen, Bookmark, X } from "lucide-react";
+import { useDevotionals } from "@/hooks/useDevotionals";
 
 const SavedDevotionals = () => {
-  const [devotionals, setDevotionals] = useState(getDevotionals);
+  const { devotionals, saveDevotional } = useDevotionals();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "saved">("all");
 
   const filtered = filter === "saved" ? devotionals.filter((d) => d.saved) : devotionals;
 
-  const toggleSave = (id: string) => {
-    const updated = devotionals.map((d) =>
-      d.id === id ? { ...d, saved: !d.saved } : d
-    );
-    updated.forEach((d) => saveDevotional(d));
-    setDevotionals(updated);
+  const toggleSave = async (id: string) => {
+    const d = devotionals.find((x) => x.id === id);
+    if (d) await saveDevotional({ ...d, saved: !d.saved });
   };
 
   return (
@@ -30,9 +27,7 @@ const SavedDevotionals = () => {
             key={f}
             onClick={() => setFilter(f)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              filter === f
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground"
+              filter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
             }`}
           >
             {f === "all" ? "All" : "Saved"}
@@ -48,29 +43,17 @@ const SavedDevotionals = () => {
           </div>
         ) : (
           filtered.map((d) => (
-            <div
-              key={d.id}
-              className="bg-card rounded-xl border border-border mb-3 overflow-hidden"
-            >
-              <button
-                className="w-full text-left p-4"
-                onClick={() => setExpanded(expanded === d.id ? null : d.id)}
-              >
+            <div key={d.id} className="bg-card rounded-xl border border-border mb-3 overflow-hidden">
+              <button className="w-full text-left p-4" onClick={() => setExpanded(expanded === d.id ? null : d.id)}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <p className="font-display font-semibold text-sm">{d.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {d.scriptureReference} · {d.topic}
-                    </p>
-                    <p className="text-[10px] text-muted-foreground mt-1">
-                      {new Date(d.createdAt).toLocaleDateString()}
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{d.scriptureReference} · {d.topic}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{new Date(d.createdAt).toLocaleDateString()}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     {d.completed && (
-                      <span className="text-[10px] bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium">
-                        ✓ Done
-                      </span>
+                      <span className="text-[10px] bg-accent text-accent-foreground px-2 py-0.5 rounded-full font-medium">✓ Done</span>
                     )}
                   </div>
                 </div>
@@ -79,49 +62,36 @@ const SavedDevotionals = () => {
               {expanded === d.id && (
                 <div className="px-4 pb-4 animate-fade-in">
                   <div className="bg-muted rounded-lg p-3 mb-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                      Scripture
-                    </p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Scripture</p>
                     <p className="text-sm italic">{d.scripture}</p>
                   </div>
 
                   {d.greekLatinInsights && (
                     <div className="bg-accent/50 rounded-lg p-3 mb-3">
-                      <p className="text-xs font-semibold text-accent-foreground uppercase tracking-wider mb-1">
-                        📜 Greek & Latin
-                      </p>
+                      <p className="text-xs font-semibold text-accent-foreground uppercase tracking-wider mb-1">📜 Greek & Latin</p>
                       <p className="text-sm">{d.greekLatinInsights}</p>
                     </div>
                   )}
 
                   <div className="mb-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                      Reflection
-                    </p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Reflection</p>
                     <p className="text-sm whitespace-pre-line">{d.reflection}</p>
                   </div>
 
                   <div className="bg-card border border-border rounded-lg p-3 mb-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                      🙏 Prayer
-                    </p>
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">🙏 Prayer</p>
                     <p className="text-sm italic">{d.prayer}</p>
                   </div>
 
                   {d.declaration && (
                     <div className="bg-muted rounded-lg p-3 mb-3">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                        ✨ Declaration
-                      </p>
+                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">✨ Declaration</p>
                       <p className="text-sm font-medium">{d.declaration}</p>
                     </div>
                   )}
 
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleSave(d.id);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); toggleSave(d.id); }}
                     className="flex items-center gap-1.5 text-xs text-primary font-medium mt-2"
                   >
                     <Bookmark className={`h-3.5 w-3.5 ${d.saved ? "fill-current" : ""}`} />

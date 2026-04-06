@@ -1,18 +1,12 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 import { BookOpen, Maximize2, Minimize2, Bookmark, CheckCircle2, RefreshCw, Search, X, Highlighter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Devotional, saveDevotional, markDayComplete } from "@/lib/devotionalStore";
+import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
+import { useTracker } from "@/hooks/useTracker";
+import { useHighlights } from "@/hooks/useHighlights";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-interface Highlight {
-  id: string;
-  text: string;
-  section: string;
-  color: string;
-  note?: string;
-}
 
 interface DevotionalReaderProps {
   devotional: Devotional;
@@ -27,74 +21,43 @@ const HIGHLIGHT_COLORS = [
   { value: "pink", class: "bg-pink-200/60 dark:bg-pink-500/30" },
 ];
 
-const HIGHLIGHTS_KEY = "devotional_highlights";
-
-function getHighlights(devotionalId: string): Highlight[] {
-  const all = JSON.parse(localStorage.getItem(HIGHLIGHTS_KEY) || "{}");
-  return all[devotionalId] || [];
-}
-
-function saveHighlights(devotionalId: string, highlights: Highlight[]) {
-  const all = JSON.parse(localStorage.getItem(HIGHLIGHTS_KEY) || "{}");
-  all[devotionalId] = highlights;
-  localStorage.setItem(HIGHLIGHTS_KEY, JSON.stringify(all));
-}
-
 const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderProps) => {
   const [saved, setSaved] = useState(devotional.saved);
   const [completed, setCompleted] = useState(devotional.completed);
   const [focusMode, setFocusMode] = useState(false);
-  const [highlights, setHighlights] = useState<Highlight[]>(getHighlights(devotional.id));
   const [highlightColor, setHighlightColor] = useState("yellow");
   const [showHighlightBar, setShowHighlightBar] = useState(false);
   const [wordLookup, setWordLookup] = useState<{ word: string; definition: string | null; loading: boolean } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    setHighlights(getHighlights(devotional.id));
-    setSaved(devotional.saved);
-    setCompleted(devotional.completed);
-  }, [devotional.id]);
+  const { saveDevotional } = useDevotionals();
+  const { markDayComplete } = useTracker();
+  const { highlights, addHighlight, removeHighlight } = useHighlights(devotional.id);
 
-  const handleSave = () => {
-    devotional.saved = true;
-    saveDevotional(devotional);
+  const handleSave = async () => {
+    await saveDevotional({ ...devotional, saved: true });
     setSaved(true);
   };
 
-  const handleComplete = () => {
-    devotional.completed = true;
-    saveDevotional(devotional);
+  const handleComplete = async () => {
+    await saveDevotional({ ...devotional, completed: true });
     const today = new Date().toISOString().split("T")[0];
-    markDayComplete(today, devotional.id);
+    await markDayComplete(today, devotional.id);
     setCompleted(true);
   };
 
   const handleTextSelect = useCallback(() => {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || !selection.toString().trim()) return;
-
     const selectedText = selection.toString().trim();
-
-    // Show highlight bar with options
     setShowHighlightBar(true);
-
-    // Store selected text for actions
     (window as any).__selectedText = selectedText;
   }, []);
 
-  const addHighlight = () => {
+  const handleAddHighlight = async () => {
     const selectedText = (window as any).__selectedText;
     if (!selectedText) return;
-    const hl: Highlight = {
-      id: Date.now().toString(36),
-      text: selectedText,
-      section: "content",
-      color: highlightColor,
-    };
-    const updated = [...highlights, hl];
-    setHighlights(updated);
-    saveHighlights(devotional.id, updated);
+    await addHighlight({ text: selectedText, section: "content", color: highlightColor });
     setShowHighlightBar(false);
     window.getSelection()?.removeAllRanges();
     toast.success("Text highlighted!");
@@ -103,15 +66,12 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
   const lookupWord = async () => {
     const selectedText = (window as any).__selectedText;
     if (!selectedText) return;
-    const word = selectedText.split(/\s+/)[0]; // first word
+    const word = selectedText.split(/\s+/)[0];
     setWordLookup({ word, definition: null, loading: true });
     setShowHighlightBar(false);
     window.getSelection()?.removeAllRanges();
-
     try {
-      const { data, error } = await supabase.functions.invoke("define-word", {
-        body: { word },
-      });
+      const { data, error } = await supabase.functions.invoke("define-word", { body: { word } });
       if (error) throw error;
       setWordLookup({ word, definition: data?.definition || "No definition found.", loading: false });
     } catch {
@@ -119,22 +79,12 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     }
   };
 
-  const removeHighlight = (id: string) => {
-    const updated = highlights.filter((h) => h.id !== id);
-    setHighlights(updated);
-    saveHighlights(devotional.id, updated);
-  };
-
   const renderHighlightedText = (text: string) => {
     if (!highlights.length) return text;
     let result = text;
-    // Simple approach: wrap highlighted phrases
     highlights.forEach((hl) => {
       const colorClass = HIGHLIGHT_COLORS.find((c) => c.value === hl.color)?.class || "";
-      result = result.replace(
-        hl.text,
-        `<mark class="${colorClass} rounded px-0.5">${hl.text}</mark>`
-      );
+      result = result.replace(hl.text, `<mark class="${colorClass} rounded px-0.5">${hl.text}</mark>`);
     });
     return result;
   };
@@ -154,11 +104,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
             {highlights.length} highlight{highlights.length > 1 ? "s" : ""}
           </span>
         )}
-        <button
-          onClick={() => setFocusMode(!focusMode)}
-          className="text-muted-foreground hover:text-foreground p-2 rounded-lg"
-          title={focusMode ? "Exit focus mode" : "Focus mode"}
-        >
+        <button onClick={() => setFocusMode(!focusMode)} className="text-muted-foreground hover:text-foreground p-2 rounded-lg" title={focusMode ? "Exit focus mode" : "Focus mode"}>
           {focusMode ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
         </button>
       </div>
@@ -168,22 +114,16 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 animate-fade-in">
           <div className="flex gap-1.5">
             {HIGHLIGHT_COLORS.map((c) => (
-              <button
-                key={c.value}
-                onClick={() => setHighlightColor(c.value)}
-                className={cn("w-6 h-6 rounded-full border-2 transition-all", c.class, highlightColor === c.value ? "border-foreground scale-110" : "border-transparent")}
-              />
+              <button key={c.value} onClick={() => setHighlightColor(c.value)} className={cn("w-6 h-6 rounded-full border-2 transition-all", c.class, highlightColor === c.value ? "border-foreground scale-110" : "border-transparent")} />
             ))}
           </div>
-          <Button size="sm" variant="soft" onClick={addHighlight} className="rounded-lg text-xs">
+          <Button size="sm" variant="soft" onClick={handleAddHighlight} className="rounded-lg text-xs">
             <Highlighter className="h-3 w-3 mr-1" /> Highlight
           </Button>
           <Button size="sm" variant="soft" onClick={lookupWord} className="rounded-lg text-xs">
             <Search className="h-3 w-3 mr-1" /> Define
           </Button>
-          <button onClick={() => setShowHighlightBar(false)} className="text-muted-foreground">
-            <X className="h-4 w-4" />
-          </button>
+          <button onClick={() => setShowHighlightBar(false)} className="text-muted-foreground"><X className="h-4 w-4" /></button>
         </div>
       )}
 
@@ -218,49 +158,34 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
           <BookOpen className="h-4 w-4 text-primary-foreground/80" />
           <span className="text-xs font-semibold text-primary-foreground/80 uppercase tracking-wider">Scripture</span>
         </div>
-        <p
-          className="font-display text-primary-foreground text-base italic leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.scripture) }}
-        />
+        <p className="font-display text-primary-foreground text-base italic leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.scripture) }} />
       </div>
 
       {/* Greek/Latin Insights */}
       {devotional.greekLatinInsights && (
         <div className="bg-accent rounded-xl p-4 mb-5 border border-border">
           <p className="text-xs font-semibold text-accent-foreground uppercase tracking-wider mb-2">📜 Greek & Latin Insights</p>
-          <p
-            className="text-sm text-accent-foreground/90 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.greekLatinInsights) }}
-          />
+          <p className="text-sm text-accent-foreground/90 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.greekLatinInsights) }} />
         </div>
       )}
 
       {/* Reflection */}
       <div className="mb-5">
         <h3 className="font-display text-lg font-semibold mb-2">Reflection</h3>
-        <div
-          className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line"
-          dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.reflection) }}
-        />
+        <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line" dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.reflection) }} />
       </div>
 
       {/* Prayer */}
       <div className="bg-card rounded-xl p-5 mb-5 border border-border">
         <h3 className="font-display text-lg font-semibold mb-2">🙏 Prayer</h3>
-        <p
-          className="text-sm leading-relaxed text-foreground/90 italic"
-          dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.prayer) }}
-        />
+        <p className="text-sm leading-relaxed text-foreground/90 italic" dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.prayer) }} />
       </div>
 
       {/* Declaration */}
       {devotional.declaration && (
         <div className="bg-muted rounded-xl p-5 mb-6 border border-primary/20">
           <h3 className="font-display text-lg font-semibold mb-2">✨ Declaration</h3>
-          <p
-            className="text-sm leading-relaxed text-foreground font-medium"
-            dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.declaration) }}
-          />
+          <p className="text-sm leading-relaxed text-foreground font-medium" dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.declaration) }} />
         </div>
       )}
 
