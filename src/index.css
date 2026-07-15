@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=Manrope:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,149 +6,157 @@
 
 @layer base {
   :root {
-    --background: 40 33% 96%;
-    --foreground: 25 30% 14%;
+    /* Cathedral: warm ivory background, deep aubergine primary, dusty rose accent, sage secondary */
+    --background: 36 40% 97%;
+    --foreground: 285 25% 15%;
 
-    --card: 40 30% 98%;
-    --card-foreground: 25 30% 14%;
+    --card: 36 45% 99%;
+    --card-foreground: 285 25% 15%;
 
-    --popover: 40 30% 98%;
-    --popover-foreground: 25 30% 14%;
+    --popover: 36 45% 99%;
+    --popover-foreground: 285 25% 15%;
 
-    --primary: 38 65% 50%;
-    --primary-foreground: 40 33% 98%;
+    --primary: 285 40% 32%;
+    --primary-foreground: 36 45% 98%;
 
-    --secondary: 140 15% 90%;
-    --secondary-foreground: 140 20% 25%;
+    --secondary: 150 20% 88%;
+    --secondary-foreground: 150 25% 22%;
 
-    --muted: 35 20% 92%;
-    --muted-foreground: 25 10% 50%;
+    --muted: 36 25% 92%;
+    --muted-foreground: 285 10% 45%;
 
-    --accent: 140 18% 85%;
-    --accent-foreground: 140 20% 20%;
+    --accent: 12 55% 90%;
+    --accent-foreground: 12 40% 30%;
 
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 35 20% 88%;
-    --input: 35 20% 88%;
-    --ring: 38 65% 50%;
+    --border: 36 20% 88%;
+    --input: 36 20% 88%;
+    --ring: 285 40% 32%;
 
-    --radius: 0.75rem;
+    --radius: 0.9rem;
 
-    --warm: 30 40% 55%;
-    --warm-foreground: 40 33% 98%;
-    --golden-glow: 42 80% 65%;
-    --sage: 140 18% 75%;
+    --warm: 12 55% 60%;
+    --warm-foreground: 36 45% 98%;
+    --golden-glow: 12 70% 70%;
+    --sage: 150 25% 55%;
 
-    --sidebar-background: 40 30% 97%;
-    --sidebar-foreground: 25 30% 14%;
-    --sidebar-primary: 38 65% 50%;
-    --sidebar-primary-foreground: 40 33% 98%;
-    --sidebar-accent: 140 18% 85%;
-    --sidebar-accent-foreground: 140 20% 20%;
-    --sidebar-border: 35 20% 88%;
-    --sidebar-ring: 38 65% 50%;
+    --sidebar-background: 36 40% 97%;
+    --sidebar-foreground: 285 25% 15%;
+    --sidebar-primary: 285 40% 32%;
+    --sidebar-primary-foreground: 36 45% 98%;
+    --sidebar-accent: 12 55% 90%;
+    --sidebar-accent-foreground: 12 40% 30%;
+    --sidebar-border: 36 20% 88%;
+    --sidebar-ring: 285 40% 32%;
 
-    --font-display: 'Playfair Display', Georgia, serif;
-    --font-body: 'Inter', system-ui, sans-serif;
+    --font-display: 'Fraunces', Georgia, serif;
+    --font-body: 'Manrope', system-ui, sans-serif;
   }
 
   .dark {
-    --background: 25 20% 10%;
-    --foreground: 40 20% 90%;
+    --background: 285 25% 9%;
+    --foreground: 36 30% 92%;
 
-    --card: 25 18% 14%;
-    --card-foreground: 40 20% 90%;
+    --card: 285 22% 13%;
+    --card-foreground: 36 30% 92%;
 
-    --popover: 25 18% 14%;
-    --popover-foreground: 40 20% 90%;
+    --popover: 285 22% 13%;
+    --popover-foreground: 36 30% 92%;
 
-    --primary: 38 65% 50%;
-    --primary-foreground: 25 20% 10%;
+    --primary: 12 65% 70%;
+    --primary-foreground: 285 30% 12%;
 
-    --secondary: 140 10% 20%;
-    --secondary-foreground: 140 15% 80%;
+    --secondary: 150 15% 22%;
+    --secondary-foreground: 150 20% 82%;
 
-    --muted: 25 15% 18%;
-    --muted-foreground: 35 10% 60%;
+    --muted: 285 15% 18%;
+    --muted-foreground: 36 15% 65%;
 
-    --accent: 140 12% 22%;
-    --accent-foreground: 140 15% 80%;
+    --accent: 12 30% 22%;
+    --accent-foreground: 12 55% 85%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 25 15% 20%;
-    --input: 25 15% 20%;
-    --ring: 38 65% 50%;
+    --border: 285 18% 22%;
+    --input: 285 18% 22%;
+    --ring: 12 65% 70%;
 
-    --warm: 30 35% 45%;
-    --warm-foreground: 40 33% 98%;
-    --golden-glow: 42 70% 55%;
-    --sage: 140 12% 30%;
+    --warm: 12 55% 55%;
+    --warm-foreground: 36 45% 98%;
+    --golden-glow: 12 65% 65%;
+    --sage: 150 20% 45%;
 
-    --sidebar-background: 25 18% 12%;
-    --sidebar-foreground: 40 20% 90%;
-    --sidebar-primary: 38 65% 50%;
-    --sidebar-primary-foreground: 25 20% 10%;
-    --sidebar-accent: 140 12% 22%;
-    --sidebar-accent-foreground: 140 15% 80%;
-    --sidebar-border: 25 15% 20%;
-    --sidebar-ring: 38 65% 50%;
+    --sidebar-background: 285 22% 11%;
+    --sidebar-foreground: 36 30% 92%;
+    --sidebar-primary: 12 65% 70%;
+    --sidebar-primary-foreground: 285 30% 12%;
+    --sidebar-accent: 12 30% 22%;
+    --sidebar-accent-foreground: 12 55% 85%;
+    --sidebar-border: 285 18% 22%;
+    --sidebar-ring: 12 65% 70%;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
+  * { @apply border-border; }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    font-feature-settings: "ss01", "ss02";
   }
-
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: var(--font-display);
-  }
-  .font-body {
-    font-family: var(--font-body);
-  }
-  .text-gradient-golden {
-    background: linear-gradient(135deg, hsl(38, 65%, 50%), hsl(42, 80%, 65%));
+  .font-display { font-family: var(--font-display); }
+  .font-body { font-family: var(--font-body); }
+
+  .text-gradient-cathedral {
+    background: linear-gradient(135deg, hsl(285 40% 32%), hsl(12 55% 60%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .bg-gradient-warm {
-    background: linear-gradient(135deg, hsl(40, 33%, 96%), hsl(35, 25%, 93%));
+    background: linear-gradient(160deg, hsl(36 40% 97%), hsl(12 40% 94%));
   }
-  .bg-gradient-golden {
-    background: linear-gradient(135deg, hsl(38, 65%, 50%), hsl(42, 80%, 65%));
+  .bg-gradient-cathedral {
+    background: linear-gradient(135deg, hsl(285 45% 28%) 0%, hsl(315 35% 40%) 55%, hsl(12 55% 60%) 100%);
+  }
+  .bg-gradient-golden { /* legacy alias -> cathedral */
+    background: linear-gradient(135deg, hsl(285 45% 28%) 0%, hsl(315 35% 40%) 55%, hsl(12 55% 60%) 100%);
+  }
+  .shadow-cathedral {
+    box-shadow: 0 10px 40px -12px hsl(285 40% 32% / 0.35);
   }
   .shadow-warm {
-    box-shadow: 0 4px 20px -4px hsl(38 65% 50% / 0.15);
+    box-shadow: 0 4px 20px -4px hsl(285 40% 32% / 0.15);
   }
   .shadow-golden {
-    box-shadow: 0 8px 30px -8px hsl(38 65% 50% / 0.25);
+    box-shadow: 0 10px 40px -12px hsl(285 40% 32% / 0.35);
+  }
+  .text-gradient-golden {
+    background: linear-gradient(135deg, hsl(285 40% 32%), hsl(12 55% 60%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
-/* Font family overrides */
+/* Font family overrides via Settings */
 [data-font="sans"] body,
 [data-font="sans"] h1, [data-font="sans"] h2, [data-font="sans"] h3,
 [data-font="sans"] h4, [data-font="sans"] h5, [data-font="sans"] h6,
 [data-font="sans"] .font-display {
-  font-family: 'Inter', system-ui, sans-serif !important;
+  font-family: 'Manrope', system-ui, sans-serif !important;
 }
-
 [data-font="mono"] body,
 [data-font="mono"] h1, [data-font="mono"] h2, [data-font="mono"] h3,
 [data-font="mono"] h4, [data-font="mono"] h5, [data-font="mono"] h6,
@@ -156,13 +164,11 @@
   font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
 }
 
-/* Font size overrides */
 [data-font-size="sm"] body { font-size: 14px; }
 [data-font-size="md"] body { font-size: 16px; }
 [data-font-size="lg"] body { font-size: 18px; }
 [data-font-size="xl"] body { font-size: 20px; }
 
-/* Focus/Reading mode */
 .focus-mode {
   position: fixed;
   inset: 0;
@@ -171,5 +177,5 @@
   background: hsl(var(--background));
 }
 .dark .focus-mode {
-  background: hsl(25, 20%, 8%);
+  background: hsl(285 25% 7%);
 }
