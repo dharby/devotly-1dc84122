@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb } from "lucide-react";
+import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb, ScrollText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDevotionals } from "@/hooks/useDevotionals";
 import { useTracker } from "@/hooks/useTracker";
@@ -104,6 +104,22 @@ const Index = () => {
 
       {/* Quick Actions */}
       <div className="px-6 mb-6">
+        <button
+          onClick={() => navigate("/sermon")}
+          className="w-full bg-card border border-border rounded-2xl p-5 text-left hover:shadow-warm transition-all mb-3"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center">
+              <ScrollText className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="font-display font-bold">Full Sermon & Bible Study</p>
+              <p className="text-xs text-muted-foreground">Extensive preaching on any topic or passage</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </button>
+
         <div className="grid grid-cols-3 gap-2">
           <button onClick={() => navigate("/prayer-timer")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
             <Timer className="h-5 w-5 text-primary mx-auto mb-1" />
