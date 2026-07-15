@@ -13,6 +13,7 @@ import Family from "./pages/Family";
 import Settings from "./pages/Settings";
 import PrayerTimer from "./pages/PrayerTimer";
 import FastingTracker from "./pages/FastingTracker";
+import Sermon from "./pages/Sermon";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/prayer-timer" element={<ProtectedRoute><PrayerTimer /></ProtectedRoute>} />
             <Route path="/fasting" element={<ProtectedRoute><FastingTracker /></ProtectedRoute>} />
+            <Route path="/sermon" element={<ProtectedRoute><Sermon /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <BottomNav />
