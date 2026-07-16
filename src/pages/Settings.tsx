@@ -6,6 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { getSettings, updateSettings, type AppSettings } from "@/lib/settingsStore";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { requestNotificationPermission, scheduleDailyReminder, cancelDailyReminder, showNotification, notificationsSupported } from "@/lib/notifications";
 
 const themes = [
   { value: "light" as const, label: "Light", icon: Sun },
@@ -42,6 +44,31 @@ const Settings = () => {
   const update = (partial: Partial<AppSettings>) => {
     const updated = updateSettings(partial);
     setSettings(updated);
+  };
+
+  const toggleReminder = async (checked: boolean) => {
+    if (checked) {
+      if (!notificationsSupported()) { toast.error("Notifications not supported on this device"); return; }
+      const perm = await requestNotificationPermission();
+      if (perm !== "granted") { toast.error("Please allow notifications in your browser"); return; }
+      update({ dailyReminderEnabled: true });
+      scheduleDailyReminder(settings.dailyReminderTime);
+      toast.success(`Daily reminder set for ${settings.dailyReminderTime}`);
+    } else {
+      update({ dailyReminderEnabled: false });
+      cancelDailyReminder();
+    }
+  };
+
+  const changeReminderTime = (time: string) => {
+    update({ dailyReminderTime: time });
+    if (settings.dailyReminderEnabled) scheduleDailyReminder(time);
+  };
+
+  const sendTest = async () => {
+    const perm = await requestNotificationPermission();
+    if (perm !== "granted") { toast.error("Enable notifications first"); return; }
+    await showNotification("Devotly · Test 🔔", "Notifications are working. Peace be with you.");
   };
 
   return (
