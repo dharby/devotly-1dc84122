@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ScrollText, RefreshCw, Sparkles, BookOpen, Quote, Users, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ChevronLeft, ScrollText, RefreshCw, Sparkles, BookOpen, Quote, Users, Heart, Bookmark, CheckCircle2, Library, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSermons, type SermonRecord } from "@/hooks/useSermons";
 
 interface SermonPoint {
   heading: string;
@@ -14,7 +15,7 @@ interface SermonPoint {
   illustration: string;
   application: string;
 }
-interface Sermon {
+interface SermonContent {
   title: string;
   subtitle: string;
   mainScripture: string;
@@ -56,11 +57,22 @@ const suggestedTopics = [
 
 export default function Sermon() {
   const navigate = useNavigate();
-  const [topic, setTopic] = useState("");
+  const [searchParams] = useSearchParams();
+  const { sermons, createSermon, updateSermon, deleteSermon } = useSermons();
+
+  const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const [style, setStyle] = useState("expository");
   const [audience, setAudience] = useState("general");
-  const [sermon, setSermon] = useState<Sermon | null>(null);
+  const [active, setActive] = useState<SermonRecord | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showLibrary, setShowLibrary] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("auto") === "1" && searchParams.get("topic") && !active && !loading) {
+      generate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const generate = async () => {
     if (!topic.trim()) return;
@@ -71,7 +83,13 @@ export default function Sermon() {
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
-      setSermon(data);
+      const content = data as SermonContent;
+      const rec = await createSermon({ topic: topic.trim(), style, audience, title: content.title, content });
+      if (rec) {
+        setActive(rec);
+        pushRecentTopic(topic.trim(), "sermon");
+        toast.success("Sermon saved to your library");
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e: any) {
       toast.error(e.message || "Failed to generate sermon");
@@ -80,20 +98,72 @@ export default function Sermon() {
     }
   };
 
+  const toggleBookmark = () => active && updateSermon(active.id, { bookmarked: !active.bookmarked }).then(() => {
+    setActive({ ...active, bookmarked: !active.bookmarked });
+    toast.success(!active.bookmarked ? "Bookmarked" : "Removed bookmark");
+  });
+
+  const toggleComplete = () => active && updateSermon(active.id, { completed: !active.completed }).then(() => {
+    setActive({ ...active, completed: !active.completed });
+    toast.success(!active.completed ? "Marked complete ✨" : "Marked incomplete");
+  });
+
+  const removeSermon = async (id: string) => {
+    await deleteSermon(id);
+    if (active?.id === id) setActive(null);
+    toast.success("Sermon deleted");
+  };
+
+  const openSaved = (s: SermonRecord) => { setActive(s); setShowLibrary(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
+
+  const sermon = active?.content as SermonContent | undefined;
+
   return (
     <div className="min-h-screen pb-24">
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
         <div className="flex items-center gap-3">
-          <button onClick={() => (sermon ? setSermon(null) : navigate(-1))} className="text-muted-foreground">
+          <button onClick={() => (active ? setActive(null) : showLibrary ? setShowLibrary(false) : navigate(-1))} className="text-muted-foreground">
             <ChevronLeft className="h-5 w-5" />
           </button>
-          <h1 className="font-display text-lg font-semibold">
-            {sermon ? "Full Sermon" : "Sermon & Bible Study"}
+          <h1 className="font-display text-lg font-semibold flex-1">
+            {active ? "Full Sermon" : showLibrary ? "Saved Sermons" : "Sermon & Bible Study"}
           </h1>
+          {!active && !showLibrary && (
+            <button onClick={() => setShowLibrary(true)} className="flex items-center gap-1.5 text-sm text-primary font-medium">
+              <Library className="h-4 w-4" /> Library {sermons.length > 0 && <span className="text-xs">({sermons.length})</span>}
+            </button>
+          )}
         </div>
       </div>
 
-      {!sermon ? (
+      {showLibrary ? (
+        <div className="px-6 pt-6 animate-fade-in">
+          {sermons.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-12">No sermons yet. Generate your first one!</p>
+          ) : (
+            <div className="space-y-3">
+              {sermons.map((s) => (
+                <div key={s.id} className="bg-card rounded-xl p-4 border border-border">
+                  <div className="flex items-start gap-3">
+                    <button onClick={() => openSaved(s)} className="flex-1 text-left">
+                      <div className="flex items-center gap-2 mb-1">
+                        {s.bookmarked && <Bookmark className="h-3 w-3 text-primary fill-primary" />}
+                        {s.completed && <CheckCircle2 className="h-3 w-3 text-green-600" />}
+                        <span className="text-[10px] uppercase tracking-widest text-primary font-semibold">{s.style}</span>
+                      </div>
+                      <p className="font-display font-semibold">{s.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{s.topic} · {new Date(s.createdAt).toLocaleDateString()}</p>
+                    </button>
+                    <button onClick={() => removeSermon(s.id)} className="text-muted-foreground p-1">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : !active || !sermon ? (
         <div className="px-6 pt-6 animate-fade-in">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-cathedral shadow-cathedral mb-4">
@@ -188,7 +258,19 @@ export default function Sermon() {
           </div>
         </div>
       ) : (
-        <article className="px-6 pt-6 pb-10 animate-fade-in max-w-2xl mx-auto space-y-8">
+        <article className="px-6 pt-4 pb-10 animate-fade-in max-w-2xl mx-auto space-y-8">
+          {/* Persistent action bar */}
+          <div className="flex gap-2 -mb-2">
+            <Button variant={active.bookmarked ? "golden" : "outline"} size="sm" className="flex-1 rounded-xl" onClick={toggleBookmark}>
+              <Bookmark className={cn("h-4 w-4 mr-1", active.bookmarked && "fill-current")} />
+              {active.bookmarked ? "Bookmarked" : "Bookmark"}
+            </Button>
+            <Button variant={active.completed ? "secondary" : "default"} size="sm" className="flex-1 rounded-xl" onClick={toggleComplete}>
+              <CheckCircle2 className={cn("h-4 w-4 mr-1", active.completed && "fill-current")} />
+              {active.completed ? "Completed" : "Mark done"}
+            </Button>
+          </div>
+
           <header className="text-center border-b border-border pb-6">
             <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">Sermon</p>
             <h1 className="font-display text-3xl font-bold leading-tight mb-2">{sermon.title}</h1>
@@ -310,7 +392,7 @@ export default function Sermon() {
             {sermon.benediction}
           </div>
 
-          <Button variant="outline" className="w-full" onClick={() => setSermon(null)}>
+          <Button variant="outline" className="w-full" onClick={() => { setActive(null); setTopic(""); }}>
             <RefreshCw className="h-4 w-4 mr-2" /> Generate Another
           </Button>
         </article>
@@ -330,4 +412,16 @@ function Section({ label, title, children, icon }: { label: string; title?: stri
       {children}
     </section>
   );
+}
+
+// ---- Recent topics helper (also used by devotional generator) ----
+export function pushRecentTopic(topic: string, kind: "devotional" | "sermon") {
+  try {
+    const key = "recent_topics";
+    const raw = localStorage.getItem(key);
+    const list: { topic: string; kind: string; at: number }[] = raw ? JSON.parse(raw) : [];
+    const filtered = list.filter((x) => x.topic.toLowerCase() !== topic.toLowerCase());
+    filtered.unshift({ topic, kind, at: Date.now() });
+    localStorage.setItem(key, JSON.stringify(filtered.slice(0, 12)));
+  } catch {}
 }
