@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
 import DevotionalReader from "@/components/DevotionalReader";
+import { pushRecentTopic } from "./Sermon";
 
 const tones = [
   { value: "personal" as const, label: "Personal", emoji: "🙏" },
@@ -51,6 +52,7 @@ const GenerateDevotional = () => {
       };
       // Save to cloud immediately
       await saveDevotional(dev);
+      pushRecentTopic(topic.trim(), "devotional");
       setDevotional(dev);
     } catch (err: any) {
       console.error("Generation error:", err);
