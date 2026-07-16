@@ -6,6 +6,8 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { getSettings, updateSettings, type AppSettings } from "@/lib/settingsStore";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
+import { requestNotificationPermission, scheduleDailyReminder, cancelDailyReminder, showNotification, notificationsSupported } from "@/lib/notifications";
 
 const themes = [
   { value: "light" as const, label: "Light", icon: Sun },
@@ -42,6 +44,31 @@ const Settings = () => {
   const update = (partial: Partial<AppSettings>) => {
     const updated = updateSettings(partial);
     setSettings(updated);
+  };
+
+  const toggleReminder = async (checked: boolean) => {
+    if (checked) {
+      if (!notificationsSupported()) { toast.error("Notifications not supported on this device"); return; }
+      const perm = await requestNotificationPermission();
+      if (perm !== "granted") { toast.error("Please allow notifications in your browser"); return; }
+      update({ dailyReminderEnabled: true });
+      scheduleDailyReminder(settings.dailyReminderTime);
+      toast.success(`Daily reminder set for ${settings.dailyReminderTime}`);
+    } else {
+      update({ dailyReminderEnabled: false });
+      cancelDailyReminder();
+    }
+  };
+
+  const changeReminderTime = (time: string) => {
+    update({ dailyReminderTime: time });
+    if (settings.dailyReminderEnabled) scheduleDailyReminder(time);
+  };
+
+  const sendTest = async () => {
+    const perm = await requestNotificationPermission();
+    if (perm !== "granted") { toast.error("Enable notifications first"); return; }
+    await showNotification("Devotly · Test 🔔", "Notifications are working. Peace be with you.");
   };
 
   return (
@@ -162,24 +189,29 @@ const Settings = () => {
               <span className="text-sm font-medium">Enable daily reminder</span>
               <Switch
                 checked={settings.dailyReminderEnabled}
-                onCheckedChange={(checked) => update({ dailyReminderEnabled: checked })}
+                onCheckedChange={toggleReminder}
               />
             </div>
             {settings.dailyReminderEnabled && (
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Reminder time</label>
-                <input
-                  type="time"
-                  value={settings.dailyReminderTime}
-                  onChange={(e) => update({ dailyReminderTime: e.target.value })}
-                  className="bg-muted border border-border rounded-lg px-3 py-2 text-sm w-full"
-                />
-              </div>
+              <>
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1">Reminder time</label>
+                  <input
+                    type="time"
+                    value={settings.dailyReminderTime}
+                    onChange={(e) => changeReminderTime(e.target.value)}
+                    className="bg-muted border border-border rounded-lg px-3 py-2 text-sm w-full"
+                  />
+                </div>
+                <Button variant="outline" size="sm" className="w-full rounded-lg" onClick={sendTest}>
+                  Send a test notification
+                </Button>
+              </>
             )}
             <p className="text-xs text-muted-foreground">
               {settings.dailyReminderEnabled
-                ? "You'll receive a notification to complete your devotional."
-                : "Turn on to get daily devotional reminders."}
+                ? "You'll receive a notification at the time above. Add Devotly to your home screen for the most reliable delivery."
+                : "Turn on to get daily devotional reminders. Install as PWA for background delivery."}
             </p>
           </div>
         </section>

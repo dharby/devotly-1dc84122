@@ -243,6 +243,54 @@ export type Database = {
         }
         Relationships: []
       }
+      sermons: {
+        Row: {
+          audience: string
+          bookmarked: boolean
+          completed: boolean
+          content: Json
+          created_at: string
+          id: string
+          notes: string | null
+          saved: boolean
+          style: string
+          title: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          audience?: string
+          bookmarked?: boolean
+          completed?: boolean
+          content: Json
+          created_at?: string
+          id?: string
+          notes?: string | null
+          saved?: boolean
+          style?: string
+          title: string
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          audience?: string
+          bookmarked?: boolean
+          completed?: boolean
+          content?: Json
+          created_at?: string
+          id?: string
+          notes?: string | null
+          saved?: boolean
+          style?: string
+          title?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tracker_days: {
         Row: {
           completed: boolean
