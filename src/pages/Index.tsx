@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb, ScrollText } from "lucide-react";
+import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb, ScrollText, History, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDevotionals } from "@/hooks/useDevotionals";
 import { useTracker } from "@/hooks/useTracker";
 import { useAuth } from "@/hooks/useAuth";
+import { useEffect, useState } from "react";
 import heroImage from "@/assets/hero-devotional.jpg";
 
 const DAILY_TOPICS = [
@@ -45,6 +46,8 @@ function getDailySuggestion() {
   return DAILY_TOPICS[dayOfYear % DAILY_TOPICS.length];
 }
 
+interface RecentTopic { topic: string; kind: "devotional" | "sermon"; at: number }
+
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -53,6 +56,25 @@ const Index = () => {
   const dailySuggestion = getDailySuggestion();
   const totalDevotionals = devotionals.length;
   const completedDays = trackerDays.filter((d) => d.completed).length;
+
+  const [recentTopics, setRecentTopics] = useState<RecentTopic[]>([]);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("recent_topics");
+      if (raw) setRecentTopics(JSON.parse(raw));
+    } catch {}
+  }, []);
+
+  const clearRecent = () => {
+    localStorage.removeItem("recent_topics");
+    setRecentTopics([]);
+  };
+
+  const openTopic = (t: RecentTopic) => {
+    navigate(t.kind === "sermon"
+      ? `/sermon?topic=${encodeURIComponent(t.topic)}`
+      : `/generate?topic=${encodeURIComponent(t.topic)}`);
+  };
 
   return (
     <div className="min-h-screen pb-24">
@@ -168,10 +190,60 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Suggested Topics — generate as devotional OR sermon */}
+      <div className="px-6 mb-8">
+        <h3 className="font-display text-lg font-semibold mb-3">Suggested Topics</h3>
+        <div className="space-y-2">
+          {["Faith", "Love", "Anxiety", "Purpose", "Gratitude", "Marriage", "Peace", "Strength", "Forgiveness", "Hope"].map((topic) => (
+            <div key={topic} className="flex items-center gap-2 bg-card border border-border rounded-xl px-3 py-2">
+              <span className="flex-1 text-sm font-medium">{topic}</span>
+              <button
+                onClick={() => navigate(`/generate?topic=${encodeURIComponent(topic)}`)}
+                className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors"
+              >
+                Devotional
+              </button>
+              <button
+                onClick={() => navigate(`/sermon?topic=${encodeURIComponent(topic)}`)}
+                className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground font-medium hover:bg-accent/80 transition-colors"
+              >
+                Sermon
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Topics */}
+      {recentTopics.length > 0 && (
+        <div className="px-6 mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display text-lg font-semibold flex items-center gap-2">
+              <History className="h-4 w-4 text-primary" /> Recent Topics
+            </h3>
+            <button onClick={clearRecent} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+              <X className="h-3 w-3" /> Clear
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentTopics.map((t) => (
+              <button
+                key={`${t.kind}-${t.at}`}
+                onClick={() => openTopic(t)}
+                className="px-3 py-1.5 rounded-full border border-border bg-card text-xs font-medium hover:border-primary/40 transition-all flex items-center gap-1.5"
+              >
+                {t.kind === "sermon" ? <ScrollText className="h-3 w-3 text-primary" /> : <Sparkles className="h-3 w-3 text-primary" />}
+                {t.topic}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Recent Devotionals */}
       <div className="px-6">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-display text-lg font-semibold">Recent</h3>
+          <h3 className="font-display text-lg font-semibold">Recent Devotionals</h3>
           <button onClick={() => navigate("/saved")} className="text-xs text-primary font-medium flex items-center gap-1">
             <Bookmark className="h-3 w-3" /> View All
           </button>
