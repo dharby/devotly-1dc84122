@@ -96,7 +96,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     let result = text;
     highlights.forEach((hl) => {
       const colorClass = HIGHLIGHT_COLORS.find((c) => c.value === hl.color)?.class || "";
-      result = result.replaceAll(hl.text, `<mark class="${colorClass} rounded px-0.5">${hl.text}</mark>`);
+      result = result.split(hl.text).join(`<mark class="${colorClass} rounded px-0.5">${hl.text}</mark>`);
     });
     return result;
   };
