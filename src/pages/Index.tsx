@@ -178,17 +178,6 @@ const Index = () => {
         </button>
       </div>
 
-      {/* Quick Topics */}
-      <div className="px-6 mb-8">
-        <h3 className="font-display text-lg font-semibold mb-3">Quick Topics</h3>
-        <div className="flex flex-wrap gap-2">
-          {["Faith", "Love", "Anxiety", "Purpose", "Gratitude", "Marriage", "Peace", "Strength"].map((topic) => (
-            <Button key={topic} variant="soft" size="sm" className="rounded-full" onClick={() => navigate(`/generate?topic=${topic}`)}>
-              {topic}
-            </Button>
-          ))}
-        </div>
-      </div>
 
       {/* Suggested Topics — generate as devotional OR sermon */}
       <div className="px-6 mb-8">
