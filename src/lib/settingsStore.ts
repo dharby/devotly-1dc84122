@@ -54,4 +54,7 @@ export function initSettings() {
   const settings = getSettings();
   applyTheme(settings.theme);
   applyFont(settings.fontFamily, settings.fontSize);
+  if (settings.dailyReminderEnabled && typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+    import("./notifications").then((m) => m.scheduleDailyReminder(settings.dailyReminderTime));
+  }
 }
