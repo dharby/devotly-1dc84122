@@ -189,24 +189,29 @@ const Settings = () => {
               <span className="text-sm font-medium">Enable daily reminder</span>
               <Switch
                 checked={settings.dailyReminderEnabled}
-                onCheckedChange={(checked) => update({ dailyReminderEnabled: checked })}
+                onCheckedChange={toggleReminder}
               />
             </div>
             {settings.dailyReminderEnabled && (
-              <div>
-                <label className="text-xs text-muted-foreground block mb-1">Reminder time</label>
-                <input
-                  type="time"
-                  value={settings.dailyReminderTime}
-                  onChange={(e) => update({ dailyReminderTime: e.target.value })}
-                  className="bg-muted border border-border rounded-lg px-3 py-2 text-sm w-full"
-                />
-              </div>
+              <>
+                <div>
+                  <label className="text-xs text-muted-foreground block mb-1">Reminder time</label>
+                  <input
+                    type="time"
+                    value={settings.dailyReminderTime}
+                    onChange={(e) => changeReminderTime(e.target.value)}
+                    className="bg-muted border border-border rounded-lg px-3 py-2 text-sm w-full"
+                  />
+                </div>
+                <Button variant="outline" size="sm" className="w-full rounded-lg" onClick={sendTest}>
+                  Send a test notification
+                </Button>
+              </>
             )}
             <p className="text-xs text-muted-foreground">
               {settings.dailyReminderEnabled
-                ? "You'll receive a notification to complete your devotional."
-                : "Turn on to get daily devotional reminders."}
+                ? "You'll receive a notification at the time above. Add Devotly to your home screen for the most reliable delivery."
+                : "Turn on to get daily devotional reminders. Install as PWA for background delivery."}
             </p>
           </div>
         </section>
