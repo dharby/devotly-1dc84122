@@ -26,9 +26,10 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
   const [completed, setCompleted] = useState(devotional.completed);
   const [focusMode, setFocusMode] = useState(false);
   const [highlightColor, setHighlightColor] = useState("yellow");
-  const [showHighlightBar, setShowHighlightBar] = useState(false);
+  const [selectionPos, setSelectionPos] = useState<{ top: number; left: number } | null>(null);
   const [wordLookup, setWordLookup] = useState<{ word: string; definition: string | null; loading: boolean } | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const selectedTextRef = useRef<string>("");
 
   const { saveDevotional } = useDevotionals();
   const { markDayComplete } = useTracker();
@@ -48,27 +49,38 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
 
   const handleTextSelect = useCallback(() => {
     const selection = window.getSelection();
-    if (!selection || selection.isCollapsed || !selection.toString().trim()) return;
+    if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+      setSelectionPos(null);
+      return;
+    }
     const selectedText = selection.toString().trim();
-    setShowHighlightBar(true);
-    (window as any).__selectedText = selectedText;
+    selectedTextRef.current = selectedText;
+    try {
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+      const top = Math.max(60, rect.top + window.scrollY - 52);
+      const left = Math.min(window.innerWidth - 180, Math.max(12, rect.left + rect.width / 2 - 90));
+      setSelectionPos({ top, left });
+    } catch {
+      setSelectionPos({ top: window.scrollY + 80, left: 20 });
+    }
   }, []);
 
-  const handleAddHighlight = async () => {
-    const selectedText = (window as any).__selectedText;
+  const handleAddHighlight = async (color?: string) => {
+    const selectedText = selectedTextRef.current;
     if (!selectedText) return;
-    await addHighlight({ text: selectedText, section: "content", color: highlightColor });
-    setShowHighlightBar(false);
+    await addHighlight({ text: selectedText, section: "content", color: color || highlightColor });
+    setSelectionPos(null);
     window.getSelection()?.removeAllRanges();
-    toast.success("Text highlighted!");
+    toast.success("Highlighted ✨");
   };
 
   const lookupWord = async () => {
-    const selectedText = (window as any).__selectedText;
+    const selectedText = selectedTextRef.current;
     if (!selectedText) return;
     const word = selectedText.split(/\s+/)[0];
     setWordLookup({ word, definition: null, loading: true });
-    setShowHighlightBar(false);
+    setSelectionPos(null);
     window.getSelection()?.removeAllRanges();
     try {
       const { data, error } = await supabase.functions.invoke("define-word", { body: { word } });
@@ -84,14 +96,14 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     let result = text;
     highlights.forEach((hl) => {
       const colorClass = HIGHLIGHT_COLORS.find((c) => c.value === hl.color)?.class || "";
-      result = result.replace(hl.text, `<mark class="${colorClass} rounded px-0.5">${hl.text}</mark>`);
+      result = result.replaceAll(hl.text, `<mark class="${colorClass} rounded px-0.5">${hl.text}</mark>`);
     });
     return result;
   };
 
   return (
     <div
-      className={cn("animate-fade-in", focusMode ? "focus-mode px-6 pt-4 pb-20" : "px-6 pt-6")}
+      className={cn("animate-fade-in relative", focusMode ? "focus-mode px-6 pt-4 pb-20" : "px-6 pt-6")}
       ref={contentRef}
       onMouseUp={handleTextSelect}
       onTouchEnd={handleTextSelect}
@@ -109,21 +121,27 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         </button>
       </div>
 
-      {/* Floating Highlight Bar */}
-      {showHighlightBar && (
-        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-xl shadow-lg px-4 py-3 flex items-center gap-3 animate-fade-in">
-          <div className="flex gap-1.5">
-            {HIGHLIGHT_COLORS.map((c) => (
-              <button key={c.value} onClick={() => setHighlightColor(c.value)} className={cn("w-6 h-6 rounded-full border-2 transition-all", c.class, highlightColor === c.value ? "border-foreground scale-110" : "border-transparent")} />
-            ))}
-          </div>
-          <Button size="sm" variant="soft" onClick={handleAddHighlight} className="rounded-lg text-xs">
-            <Highlighter className="h-3 w-3 mr-1" /> Highlight
-          </Button>
-          <Button size="sm" variant="soft" onClick={lookupWord} className="rounded-lg text-xs">
-            <Search className="h-3 w-3 mr-1" /> Define
-          </Button>
-          <button onClick={() => setShowHighlightBar(false)} className="text-muted-foreground"><X className="h-4 w-4" /></button>
+      {/* Floating Highlight Bar — anchored near selection */}
+      {selectionPos && (
+        <div
+          className="absolute z-50 bg-card border border-border rounded-full shadow-lg px-2 py-1.5 flex items-center gap-1 animate-fade-in"
+          style={{ top: selectionPos.top, left: selectionPos.left }}
+          onMouseDown={(e) => e.preventDefault()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          {HIGHLIGHT_COLORS.map((c) => (
+            <button
+              key={c.value}
+              onClick={() => { setHighlightColor(c.value); handleAddHighlight(c.value); }}
+              className={cn("w-7 h-7 rounded-full transition-transform hover:scale-110", c.class)}
+              title={`Highlight ${c.value}`}
+            />
+          ))}
+          <div className="w-px h-6 bg-border mx-1" />
+          <button onClick={lookupWord} className="px-2 py-1 text-xs font-medium text-foreground hover:text-primary flex items-center gap-1">
+            <Search className="h-3 w-3" /> Define
+          </button>
+          <button onClick={() => setSelectionPos(null)} className="text-muted-foreground p-1"><X className="h-3 w-3" /></button>
         </div>
       )}
 
