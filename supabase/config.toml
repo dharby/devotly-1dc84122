@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.define-word]
 verify_jwt = false
+
+[functions.find-scripture]
+verify_jwt = false
