@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb, ScrollText, History, X } from "lucide-react";
+import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb, ScrollText, History, X, Search, NotebookPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDevotionals } from "@/hooks/useDevotionals";
 import { useTracker } from "@/hooks/useTracker";
