@@ -143,6 +143,14 @@ const Index = () => {
         </button>
 
         <div className="grid grid-cols-3 gap-2">
+          <button onClick={() => navigate("/scripture")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
+            <Search className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Scripture</p>
+          </button>
+          <button onClick={() => navigate("/notes")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
+            <NotebookPen className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Notes</p>
+          </button>
           <button onClick={() => navigate("/prayer-timer")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
             <Timer className="h-5 w-5 text-primary mx-auto mb-1" />
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Prayer</p>
@@ -154,6 +162,10 @@ const Index = () => {
           <button onClick={() => navigate("/family")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
             <Users className="h-5 w-5 text-primary mx-auto mb-1" />
             <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Family</p>
+          </button>
+          <button onClick={() => navigate("/tracker")} className="bg-card rounded-xl p-3 border border-border text-center hover:shadow-warm transition-shadow">
+            <Calendar className="h-5 w-5 text-primary mx-auto mb-1" />
+            <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Tracker</p>
           </button>
         </div>
       </div>
