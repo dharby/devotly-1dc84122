@@ -1,12 +1,12 @@
-import { Home, BookOpen, ScrollText, Calendar, Settings } from "lucide-react";
+import { Home, BookOpen, Search, NotebookPen, Settings } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
   { icon: BookOpen, label: "Devotion", path: "/generate" },
-  { icon: ScrollText, label: "Sermon", path: "/sermon" },
-  { icon: Calendar, label: "Tracker", path: "/tracker" },
+  { icon: Search, label: "Scripture", path: "/scripture" },
+  { icon: NotebookPen, label: "Notes", path: "/notes" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
