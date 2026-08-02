@@ -14,6 +14,8 @@ import Settings from "./pages/Settings";
 import PrayerTimer from "./pages/PrayerTimer";
 import FastingTracker from "./pages/FastingTracker";
 import Sermon from "./pages/Sermon";
+import Notes from "./pages/Notes";
+import ScriptureSearch from "./pages/ScriptureSearch";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
