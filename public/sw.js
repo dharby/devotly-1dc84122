@@ -5,7 +5,7 @@
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
-let reminderTimer = null;
+const timers = {};
 
 function msUntil(timeHHmm) {
   const [h, m] = String(timeHHmm).split(":").map(Number);
@@ -17,31 +17,41 @@ function msUntil(timeHHmm) {
   return next.getTime() - now.getTime();
 }
 
-function schedule(timeHHmm) {
-  if (reminderTimer) clearTimeout(reminderTimer);
+function schedule(kind, timeHHmm, content) {
+  if (timers[kind]) clearTimeout(timers[kind]);
   const delay = msUntil(timeHHmm);
   if (delay == null) return;
-  reminderTimer = setTimeout(async () => {
-    await self.registration.showNotification("Devotly · Time for your devotional 🌿", {
-      body: "Take a quiet moment with God today.",
+  timers[kind] = setTimeout(async () => {
+    await self.registration.showNotification(content.title, {
+      body: content.body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",
-      tag: "devotly-daily",
+      tag: `devotly-${kind}`,
       renotify: true,
       requireInteraction: false,
-      data: { url: "/generate" },
+      data: { url: content.url || "/" },
     });
-    schedule(timeHHmm);
+    schedule(kind, timeHHmm, content);
   }, delay);
 }
 
 self.addEventListener("message", (event) => {
   const data = event.data || {};
-  if (data.type === "SCHEDULE_REMINDER") schedule(data.time);
-  if (data.type === "CANCEL_REMINDER" && reminderTimer) {
-    clearTimeout(reminderTimer);
-    reminderTimer = null;
+  const kind = data.kind || "devotion";
+
+  if (data.type === "SCHEDULE_REMINDER") {
+    schedule(kind, data.time, {
+      title: data.title || "Devotly · Time for your devotional 🌿",
+      body: data.body || "Take a quiet moment with God today.",
+      url: data.url || "/generate",
+    });
   }
+
+  if (data.type === "CANCEL_REMINDER" && timers[kind]) {
+    clearTimeout(timers[kind]);
+    delete timers[kind];
+  }
+
   if (data.type === "SHOW_NOTIFICATION") {
     self.registration.showNotification(data.title, {
       body: data.body,
