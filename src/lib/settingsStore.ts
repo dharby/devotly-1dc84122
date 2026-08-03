@@ -1,3 +1,17 @@
+export const BIBLE_TRANSLATIONS = [
+  { value: "ESV", label: "ESV — English Standard Version" },
+  { value: "KJV", label: "KJV — King James Version" },
+  { value: "NKJV", label: "NKJV — New King James Version" },
+  { value: "NIV", label: "NIV — New International Version" },
+  { value: "NLT", label: "NLT — New Living Translation" },
+  { value: "NASB", label: "NASB — New American Standard" },
+  { value: "AMP", label: "AMP — Amplified Bible" },
+  { value: "MSG", label: "MSG — The Message" },
+  { value: "CSB", label: "CSB — Christian Standard Bible" },
+] as const;
+
+export type BibleTranslation = (typeof BIBLE_TRANSLATIONS)[number]["value"];
+
 export interface AppSettings {
   theme: "light" | "dark" | "system";
   language: "en";
@@ -5,6 +19,14 @@ export interface AppSettings {
   fontSize: "sm" | "md" | "lg" | "xl";
   dailyReminderEnabled: boolean;
   dailyReminderTime: string; // HH:mm
+  wordOfDayEnabled: boolean;
+  wordOfDayTime: string; // HH:mm
+  scriptureOfDayEnabled: boolean;
+  scriptureOfDayTime: string; // HH:mm
+  /** Primary translation used when generating devotionals */
+  bibleTranslation: BibleTranslation;
+  /** Extra translations shown alongside the primary one */
+  compareTranslations: BibleTranslation[];
 }
 
 const SETTINGS_KEY = "app_settings";
@@ -16,6 +38,12 @@ const defaults: AppSettings = {
   fontSize: "md",
   dailyReminderEnabled: false,
   dailyReminderTime: "07:00",
+  wordOfDayEnabled: false,
+  wordOfDayTime: "09:00",
+  scriptureOfDayEnabled: false,
+  scriptureOfDayTime: "20:00",
+  bibleTranslation: "ESV",
+  compareTranslations: [],
 };
 
 export function getSettings(): AppSettings {
@@ -54,7 +82,11 @@ export function initSettings() {
   const settings = getSettings();
   applyTheme(settings.theme);
   applyFont(settings.fontFamily, settings.fontSize);
-  if (settings.dailyReminderEnabled && typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-    import("./notifications").then((m) => m.scheduleDailyReminder(settings.dailyReminderTime));
+  if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+    import("./notifications").then((m) => {
+      if (settings.dailyReminderEnabled) m.scheduleReminder("devotion", settings.dailyReminderTime);
+      if (settings.wordOfDayEnabled) m.scheduleReminder("word", settings.wordOfDayTime);
+      if (settings.scriptureOfDayEnabled) m.scheduleReminder("scripture", settings.scriptureOfDayTime);
+    });
   }
 }
