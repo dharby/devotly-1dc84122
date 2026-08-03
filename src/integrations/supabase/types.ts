@@ -70,6 +70,8 @@ export type Database = {
           title: string
           tone: string
           topic: string
+          translation: string
+          translations: Json
           user_id: string
         }
         Insert: {
@@ -86,6 +88,8 @@ export type Database = {
           title: string
           tone?: string
           topic: string
+          translation?: string
+          translations?: Json
           user_id: string
         }
         Update: {
@@ -102,6 +106,8 @@ export type Database = {
           title?: string
           tone?: string
           topic?: string
+          translation?: string
+          translations?: Json
           user_id?: string
         }
         Relationships: []
