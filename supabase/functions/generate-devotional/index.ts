@@ -9,7 +9,8 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { topic, tone } = await req.json();
+    const { topic, tone, translation = "ESV", compareTranslations = [] } = await req.json();
+    const extras: string[] = Array.isArray(compareTranslations) ? compareTranslations.filter((t: unknown) => typeof t === "string" && t !== translation) : [];
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -18,8 +19,9 @@ serve(async (req) => {
 When generating a devotional, you MUST return valid JSON with this exact structure:
 {
   "title": "A compelling, meaningful title",
-  "scripture": "The full Bible verse text with translation (ESV preferred)",
-  "scriptureReference": "Book Chapter:Verse",
+  "scripture": "The full Bible verse text quoted accurately in the ${translation} translation",
+  "scriptureReference": "Book Chapter:Verse (${translation})",
+  "translations": [{"version": "KJV", "text": "the same verse rendered in that translation"}],
   "greekLatinInsights": "Detailed analysis of 2-3 key Greek/Hebrew/Latin words from the scripture. Include the original word, transliteration, pronunciation guide, and deep meaning. Connect each word to the broader theological concept.",
   "reflection": "An extensive reflection (at least 5-6 paragraphs) that includes:\\n- Deep theological insights\\n- Real-life relatable stories and examples\\n- Cross-references to at least 3-4 other Bible passages (include full verse text)\\n- Historical and cultural context\\n- Practical application for daily life\\n- Emotional connection and encouragement",
   "prayer": "A heartfelt, detailed prayer (at least 3 paragraphs) that covers thanksgiving, petition, and surrender",
@@ -32,9 +34,14 @@ TONE GUIDELINES:
 - "encouraging": Extra uplifting, hope-filled, with emphasis on God's promises and faithfulness.
 - "deep": Academic depth, extensive cross-references, theological analysis, word studies.
 
+TRANSLATION RULES:
+- Quote the main scripture in the ${translation} translation and never mix translations inside one quotation.
+- "translations" must contain exactly these additional versions: ${extras.length ? extras.join(", ") : "none — return an empty array"}. Quote the SAME verse reference in each, as accurately as you can.
+- Any verses cited inside the reflection should also use ${translation} unless you explicitly name another version.
+
 CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.`;
 
-    const userPrompt = `Generate an extensive devotional on the topic of "${topic}" with a "${tone}" tone. Make it deeply insightful with multiple scripture references, relatable stories, Greek/Latin word analysis, and practical life application.`;
+    const userPrompt = `Generate an extensive devotional on the topic of "${topic}" with a "${tone}" tone, using the ${translation} Bible translation${extras.length ? ` and also providing the main verse in: ${extras.join(", ")}` : ""}. Make it deeply insightful with multiple scripture references, relatable stories, Greek/Latin word analysis, and practical life application.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
