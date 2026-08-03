@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { getSettings, updateSettings, type AppSettings } from "@/lib/settingsStore";
+import { getSettings, updateSettings, BIBLE_TRANSLATIONS, type AppSettings, type BibleTranslation } from "@/lib/settingsStore";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { requestNotificationPermission, scheduleReminder, cancelReminder, showNotification, notificationsSupported, type ReminderKind } from "@/lib/notifications";
