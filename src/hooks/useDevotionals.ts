@@ -9,6 +9,8 @@ export interface Devotional {
   tone: "personal" | "family" | "encouraging" | "deep";
   scripture: string;
   scriptureReference: string;
+  translation?: string;
+  translations?: { version: string; text: string }[];
   greekLatinInsights?: string;
   reflection: string;
   prayer: string;
@@ -52,6 +54,8 @@ export function useDevotionals() {
         tone: dev.tone,
         scripture: dev.scripture,
         scripture_reference: dev.scriptureReference,
+        translation: dev.translation || "ESV",
+        translations: dev.translations || [],
         greek_latin_insights: dev.greekLatinInsights || null,
         reflection: dev.reflection,
         prayer: dev.prayer,
@@ -68,6 +72,8 @@ export function useDevotionals() {
         tone: dev.tone,
         scripture: dev.scripture,
         scripture_reference: dev.scriptureReference,
+        translation: dev.translation || "ESV",
+        translations: dev.translations || [],
         greek_latin_insights: dev.greekLatinInsights || null,
         reflection: dev.reflection,
         prayer: dev.prayer,
@@ -91,6 +97,8 @@ function mapRow(row: any): Devotional {
     tone: row.tone,
     scripture: row.scripture,
     scriptureReference: row.scripture_reference,
+    translation: row.translation || "ESV",
+    translations: Array.isArray(row.translations) ? row.translations : [],
     greekLatinInsights: row.greek_latin_insights,
     reflection: row.reflection,
     prayer: row.prayer,
