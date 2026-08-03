@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
 import DevotionalReader from "@/components/DevotionalReader";
 import { pushRecentTopic } from "./Sermon";
+import { BIBLE_TRANSLATIONS, getSettings, updateSettings, type BibleTranslation } from "@/lib/settingsStore";
 
 const tones = [
   { value: "personal" as const, label: "Personal", emoji: "🙏" },
@@ -22,6 +23,16 @@ const GenerateDevotional = () => {
   const navigate = useNavigate();
   const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const [tone, setTone] = useState<Devotional["tone"]>("personal");
+  const [translation, setTranslation] = useState<BibleTranslation>(getSettings().bibleTranslation);
+  const [compare, setCompare] = useState<BibleTranslation[]>(getSettings().compareTranslations);
+
+  const toggleCompare = (v: BibleTranslation) => {
+    setCompare((prev) => {
+      const next = prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v].slice(0, 3);
+      updateSettings({ compareTranslations: next });
+      return next;
+    });
+  };
   const [devotional, setDevotional] = useState<Devotional | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { saveDevotional } = useDevotionals();
@@ -31,7 +42,7 @@ const GenerateDevotional = () => {
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-devotional", {
-        body: { topic: topic.trim(), tone },
+        body: { topic: topic.trim(), tone, translation, compareTranslations: compare },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -42,6 +53,8 @@ const GenerateDevotional = () => {
         tone,
         scripture: data.scripture || "",
         scriptureReference: data.scriptureReference || "",
+        translation,
+        translations: Array.isArray(data.translations) ? data.translations : [],
         greekLatinInsights: data.greekLatinInsights,
         reflection: data.reflection || "",
         prayer: data.prayer || "",
@@ -110,6 +123,40 @@ const GenerateDevotional = () => {
                   >
                     <span className="text-lg">{t.emoji}</span>
                     {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Bible Translation</label>
+              <select
+                value={translation}
+                onChange={(e) => {
+                  const v = e.target.value as BibleTranslation;
+                  setTranslation(v);
+                  updateSettings({ bibleTranslation: v });
+                }}
+                className="w-full bg-card border border-border rounded-xl px-4 py-3 text-sm"
+              >
+                {BIBLE_TRANSLATIONS.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+              <p className="text-xs text-muted-foreground mt-2 mb-2">Also show the verse in (up to 3):</p>
+              <div className="flex flex-wrap gap-2">
+                {BIBLE_TRANSLATIONS.filter((t) => t.value !== translation).map((t) => (
+                  <button
+                    key={t.value}
+                    onClick={() => toggleCompare(t.value)}
+                    className={cn(
+                      "px-3 py-1.5 rounded-full border text-xs font-medium transition-all",
+                      compare.includes(t.value)
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border bg-card text-muted-foreground"
+                    )}
+                  >
+                    {t.value}
                   </button>
                 ))}
               </div>
