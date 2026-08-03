@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ChevronLeft, ScrollText, RefreshCw, Sparkles, BookOpen, Quote, Users, Heart, Bookmark, CheckCircle2, Library, Trash2 } from "lucide-react";
+import { ChevronLeft, ScrollText, RefreshCw, Sparkles, BookOpen, Quote, Users, Heart, Bookmark, CheckCircle2, Library, Trash2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSermons, type SermonRecord } from "@/hooks/useSermons";
+import { sharePdf } from "@/lib/pdfExport";
 
 interface SermonPoint {
   heading: string;
@@ -112,6 +113,41 @@ export default function Sermon() {
     await deleteSermon(id);
     if (active?.id === id) setActive(null);
     toast.success("Sermon deleted");
+  };
+
+  const shareAsPdf = async () => {
+    if (!active) return;
+    const c = active.content as SermonContent;
+    const blocks = [
+      { heading: `Main Scripture — ${c.mainScriptureReference}`, text: c.mainScripture, italic: true },
+      { heading: "Big Idea", text: c.bigIdea },
+      { heading: "Introduction", text: c.introduction },
+      { heading: "Context", text: [
+          c.context?.historical && `Historical: ${c.context.historical}`,
+          c.context?.literary && `Literary: ${c.context.literary}`,
+          c.context?.author && `Author: ${c.context.author}`,
+        ].filter(Boolean).join("\n\n") },
+      ...(c.wordStudy?.length ? [{ heading: "Word Study", text: c.wordStudy.map((w) => `${w.word} (${w.transliteration}) — ${w.meaning}`).join("\n\n") }] : []),
+      ...(c.points || []).flatMap((pt, i) => [{
+        heading: `${i + 1}. ${pt.heading}`,
+        text: [pt.scripture && `Scripture: ${pt.scripture}`, pt.exposition, pt.illustration && `Illustration: ${pt.illustration}`, pt.application && `Application: ${pt.application}`]
+          .filter(Boolean).join("\n\n"),
+      }]),
+      ...(c.crossReferences?.length ? [{ heading: "Cross References", text: c.crossReferences.map((r) => `${r.reference} — ${r.text}\n${r.connection}`).join("\n\n") }] : []),
+      ...(c.theologicalThemes?.length ? [{ heading: "Theological Themes", text: c.theologicalThemes.join(", ") }] : []),
+      ...(c.commonMisunderstandings ? [{ heading: "Common Misunderstandings", text: c.commonMisunderstandings }] : []),
+      ...(c.personalStudyQuestions?.length ? [{ heading: "Personal Study Questions", text: c.personalStudyQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n") }] : []),
+      ...(c.groupDiscussionQuestions?.length ? [{ heading: "Group Discussion Questions", text: c.groupDiscussionQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n") }] : []),
+      ...(c.callToAction ? [{ heading: "Call to Action", text: c.callToAction }] : []),
+      ...(c.closingPrayer ? [{ heading: "Closing Prayer", text: c.closingPrayer, italic: true }] : []),
+      ...(c.benediction ? [{ heading: "Benediction", text: c.benediction, italic: true }] : []),
+    ];
+    try {
+      const result = await sharePdf({ title: c.title, subtitle: c.subtitle || active.topic, blocks, footer: "Devotly · Sermon & Bible Study" });
+      toast.success(result === "shared" ? "Shared" : "PDF downloaded");
+    } catch {
+      toast.error("Could not create the PDF");
+    }
   };
 
   const openSaved = (s: SermonRecord) => { setActive(s); setShowLibrary(false); window.scrollTo({ top: 0, behavior: "smooth" }); };
@@ -268,6 +304,9 @@ export default function Sermon() {
             <Button variant={active.completed ? "secondary" : "default"} size="sm" className="flex-1 rounded-xl" onClick={toggleComplete}>
               <CheckCircle2 className={cn("h-4 w-4 mr-1", active.completed && "fill-current")} />
               {active.completed ? "Completed" : "Mark done"}
+            </Button>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={shareAsPdf} title="Share as PDF">
+              <Share2 className="h-4 w-4" />
             </Button>
           </div>
 

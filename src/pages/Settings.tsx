@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { ChevronLeft, Sun, Moon, Monitor, Type, Globe, Bell, LogOut } from "lucide-react";
+import { ChevronLeft, Sun, Moon, Monitor, Type, Globe, Bell, LogOut, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { getSettings, updateSettings, type AppSettings } from "@/lib/settingsStore";
+import { getSettings, updateSettings, BIBLE_TRANSLATIONS, type AppSettings, type BibleTranslation } from "@/lib/settingsStore";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
-import { requestNotificationPermission, scheduleDailyReminder, cancelDailyReminder, showNotification, notificationsSupported } from "@/lib/notifications";
+import { requestNotificationPermission, scheduleReminder, cancelReminder, showNotification, notificationsSupported, type ReminderKind } from "@/lib/notifications";
 
 const themes = [
   { value: "light" as const, label: "Light", icon: Sun },
@@ -46,23 +46,30 @@ const Settings = () => {
     setSettings(updated);
   };
 
-  const toggleReminder = async (checked: boolean) => {
+  const REMINDERS: { kind: ReminderKind; label: string; hint: string; enabledKey: keyof AppSettings; timeKey: keyof AppSettings }[] = [
+    { kind: "devotion", label: "Time for devotion", hint: "A nudge to sit down with today's devotional.", enabledKey: "dailyReminderEnabled", timeKey: "dailyReminderTime" },
+    { kind: "word", label: "Word of the Day", hint: "A single word to meditate on through the day.", enabledKey: "wordOfDayEnabled", timeKey: "wordOfDayTime" },
+    { kind: "scripture", label: "Scripture of the Day", hint: "A verse delivered to your notification centre.", enabledKey: "scriptureOfDayEnabled", timeKey: "scriptureOfDayTime" },
+  ];
+
+  const toggleReminder = async (r: typeof REMINDERS[number], checked: boolean) => {
     if (checked) {
       if (!notificationsSupported()) { toast.error("Notifications not supported on this device"); return; }
       const perm = await requestNotificationPermission();
       if (perm !== "granted") { toast.error("Please allow notifications in your browser"); return; }
-      update({ dailyReminderEnabled: true });
-      scheduleDailyReminder(settings.dailyReminderTime);
-      toast.success(`Daily reminder set for ${settings.dailyReminderTime}`);
+      const time = settings[r.timeKey] as string;
+      update({ [r.enabledKey]: true } as Partial<AppSettings>);
+      scheduleReminder(r.kind, time);
+      toast.success(`${r.label} set for ${time}`);
     } else {
-      update({ dailyReminderEnabled: false });
-      cancelDailyReminder();
+      update({ [r.enabledKey]: false } as Partial<AppSettings>);
+      cancelReminder(r.kind);
     }
   };
 
-  const changeReminderTime = (time: string) => {
-    update({ dailyReminderTime: time });
-    if (settings.dailyReminderEnabled) scheduleDailyReminder(time);
+  const changeReminderTime = (r: typeof REMINDERS[number], time: string) => {
+    update({ [r.timeKey]: time } as Partial<AppSettings>);
+    if (settings[r.enabledKey]) scheduleReminder(r.kind, time);
   };
 
   const sendTest = async () => {
@@ -179,42 +186,80 @@ const Settings = () => {
           </div>
         </section>
 
-        {/* Daily Reminder */}
+        {/* Notifications */}
         <section>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
-            <Bell className="h-4 w-4 text-primary" /> Daily Reminder
+            <Bell className="h-4 w-4 text-primary" /> Notifications
           </h2>
-          <div className="bg-card rounded-xl p-4 border border-border space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Enable daily reminder</span>
-              <Switch
-                checked={settings.dailyReminderEnabled}
-                onCheckedChange={toggleReminder}
-              />
-            </div>
-            {settings.dailyReminderEnabled && (
-              <>
-                <div>
-                  <label className="text-xs text-muted-foreground block mb-1">Reminder time</label>
-                  <input
-                    type="time"
-                    value={settings.dailyReminderTime}
-                    onChange={(e) => changeReminderTime(e.target.value)}
-                    className="bg-muted border border-border rounded-lg px-3 py-2 text-sm w-full"
+          <div className="bg-card rounded-xl p-4 border border-border space-y-5">
+            {REMINDERS.map((r) => (
+              <div key={r.kind} className="space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-medium">{r.label}</p>
+                    <p className="text-xs text-muted-foreground">{r.hint}</p>
+                  </div>
+                  <Switch
+                    checked={Boolean(settings[r.enabledKey])}
+                    onCheckedChange={(c) => toggleReminder(r, c)}
                   />
                 </div>
-                <Button variant="outline" size="sm" className="w-full rounded-lg" onClick={sendTest}>
-                  Send a test notification
-                </Button>
-              </>
-            )}
+                {settings[r.enabledKey] && (
+                  <input
+                    type="time"
+                    value={settings[r.timeKey] as string}
+                    onChange={(e) => changeReminderTime(r, e.target.value)}
+                    className="bg-muted border border-border rounded-lg px-3 py-2 text-sm w-full"
+                  />
+                )}
+              </div>
+            ))}
+            <Button variant="outline" size="sm" className="w-full rounded-lg" onClick={sendTest}>
+              Send a test notification
+            </Button>
             <p className="text-xs text-muted-foreground">
-              {settings.dailyReminderEnabled
-                ? "You'll receive a notification at the time above. Add Devotly to your home screen for the most reliable delivery."
-                : "Turn on to get daily devotional reminders. Install as PWA for background delivery."}
+              Notifications are delivered to your device notification centre. Add Devotly to your home screen for the most reliable delivery.
             </p>
           </div>
         </section>
+
+        {/* Bible translation */}
+        <section>
+          <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
+            <BookOpen className="h-4 w-4 text-primary" /> Bible Translation
+          </h2>
+          <div className="bg-card rounded-xl p-4 border border-border space-y-3">
+            <select
+              value={settings.bibleTranslation}
+              onChange={(e) => update({ bibleTranslation: e.target.value as BibleTranslation })}
+              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm"
+            >
+              {BIBLE_TRANSLATIONS.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+            <p className="text-xs text-muted-foreground">Also show verses in (up to 3):</p>
+            <div className="flex flex-wrap gap-2">
+              {BIBLE_TRANSLATIONS.filter((t) => t.value !== settings.bibleTranslation).map((t) => {
+                const on = settings.compareTranslations.includes(t.value);
+                return (
+                  <button
+                    key={t.value}
+                    onClick={() => update({
+                      compareTranslations: on
+                        ? settings.compareTranslations.filter((x) => x !== t.value)
+                        : [...settings.compareTranslations, t.value].slice(0, 3),
+                    })}
+                    className={`px-3 py-1.5 rounded-full border text-xs font-medium ${on ? "border-primary bg-primary/10 text-foreground" : "border-border bg-muted text-muted-foreground"}`}
+                  >
+                    {t.value}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Account */}
         <section>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">

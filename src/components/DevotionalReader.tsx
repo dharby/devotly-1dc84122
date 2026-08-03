@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { BookOpen, Maximize2, Minimize2, Bookmark, CheckCircle2, RefreshCw, Search, X, Highlighter } from "lucide-react";
+import { BookOpen, Maximize2, Minimize2, Bookmark, CheckCircle2, RefreshCw, Search, X, Highlighter, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
@@ -7,6 +7,7 @@ import { useTracker } from "@/hooks/useTracker";
 import { useHighlights } from "@/hooks/useHighlights";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { sharePdf } from "@/lib/pdfExport";
 
 interface DevotionalReaderProps {
   devotional: Devotional;
@@ -20,6 +21,11 @@ const HIGHLIGHT_COLORS = [
   { value: "blue", class: "bg-blue-200/60 dark:bg-blue-500/30" },
   { value: "pink", class: "bg-pink-200/60 dark:bg-pink-500/30" },
 ];
+
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderProps) => {
   const [saved, setSaved] = useState(devotional.saved);
@@ -91,14 +97,53 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     }
   };
 
+  // Escape first, then match highlights with flexible whitespace so a selection
+  // that spans several words, lines or paragraphs still highlights correctly.
   const renderHighlightedText = (text: string) => {
-    if (!highlights.length) return text;
-    let result = text;
-    highlights.forEach((hl) => {
-      const colorClass = HIGHLIGHT_COLORS.find((c) => c.value === hl.color)?.class || "";
-      result = result.split(hl.text).join(`<mark class="${colorClass} rounded px-0.5">${hl.text}</mark>`);
-    });
+    const escaped = escapeHtml(text);
+    if (!highlights.length) return escaped;
+    const marks: string[] = [];
+    let result = escaped;
+    [...highlights]
+      .sort((a, b) => b.text.length - a.text.length)
+      .forEach((hl) => {
+        const needle = hl.text.trim();
+        if (!needle) return;
+        const colorClass = HIGHLIGHT_COLORS.find((c) => c.value === hl.color)?.class || "";
+        const pattern = new RegExp(escapeRegExp(escapeHtml(needle)).replace(/\s+/g, "\\s+"), "gi");
+        result = result.replace(pattern, (match) => {
+          const token = `\u0000H${marks.length}\u0000`;
+          marks.push(`<mark class="${colorClass} rounded px-0.5">${match}</mark>`);
+          return token;
+        });
+      });
+    marks.forEach((m, i) => { result = result.split(`\u0000H${i}\u0000`).join(m); });
     return result;
+  };
+
+  const handleSharePdf = async () => {
+    const blocks = [
+      { heading: `Scripture — ${devotional.scriptureReference}`, text: devotional.scripture, italic: true },
+      ...(devotional.translations || []).map((t) => ({ heading: t.version, text: t.text, italic: true })),
+      ...(devotional.greekLatinInsights ? [{ heading: "Greek & Latin Insights", text: devotional.greekLatinInsights }] : []),
+      { heading: "Reflection", text: devotional.reflection },
+      { heading: "Prayer", text: devotional.prayer },
+      ...(devotional.declaration ? [{ heading: "Declaration", text: devotional.declaration }] : []),
+      ...(highlights.length
+        ? [{ heading: "Your Highlights", text: highlights.map((h) => `\u201C${h.text}\u201D`).join("\n\n"), italic: true, small: true }]
+        : []),
+    ];
+    try {
+      const result = await sharePdf({
+        title: devotional.title,
+        subtitle: `${devotional.topic} · ${devotional.scriptureReference} · Devotly`,
+        blocks,
+        footer: "Devotly · Daily Devotional",
+      });
+      toast.success(result === "shared" ? "Shared" : "PDF downloaded");
+    } catch {
+      toast.error("Could not create the PDF");
+    }
   };
 
   return (
@@ -142,6 +187,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
             <Search className="h-3 w-3" /> Define
           </button>
           <button onClick={() => setSelectionPos(null)} className="text-muted-foreground p-1"><X className="h-3 w-3" /></button>
+          <span className="sr-only">Highlight selection</span>
         </div>
       )}
 
@@ -178,6 +224,18 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         </div>
         <p className="font-display text-primary-foreground text-base italic leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.scripture) }} />
       </div>
+
+      {/* Other translations */}
+      {devotional.translations && devotional.translations.length > 0 && (
+        <div className="mb-5 space-y-2">
+          {devotional.translations.map((t) => (
+            <div key={t.version} className="bg-card border border-border rounded-xl p-4">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-primary mb-1">{t.version}</p>
+              <p className="text-sm italic leading-relaxed text-foreground/90" dangerouslySetInnerHTML={{ __html: renderHighlightedText(t.text) }} />
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Greek/Latin Insights */}
       {devotional.greekLatinInsights && (
@@ -240,9 +298,14 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
               {completed ? "Completed" : "Complete"}
             </Button>
           </div>
-          <Button variant="outline" className="w-full rounded-xl" onClick={onRegenerate}>
-            <RefreshCw className="h-4 w-4 mr-2" /> Regenerate
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={handleSharePdf}>
+              <Share2 className="h-4 w-4 mr-2" /> Share PDF
+            </Button>
+            <Button variant="outline" className="flex-1 rounded-xl" onClick={onRegenerate}>
+              <RefreshCw className="h-4 w-4 mr-2" /> Regenerate
+            </Button>
+          </div>
         </>
       )}
     </div>
