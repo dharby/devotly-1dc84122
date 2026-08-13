@@ -64,11 +64,20 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     try {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
-      const top = Math.max(60, rect.top + window.scrollY - 52);
-      const left = Math.min(window.innerWidth - 180, Math.max(12, rect.left + rect.width / 2 - 90));
+      const host = contentRef.current?.getBoundingClientRect();
+      if (!host || (rect.width === 0 && rect.height === 0)) {
+        setSelectionPos({ top: 8, left: 12 });
+        return;
+      }
+      // Position relative to the reader container (the pill's offset parent).
+      const top = Math.max(4, rect.top - host.top - 50);
+      const left = Math.min(
+        host.width - 210,
+        Math.max(4, rect.left - host.left + rect.width / 2 - 105),
+      );
       setSelectionPos({ top, left });
     } catch {
-      setSelectionPos({ top: window.scrollY + 80, left: 20 });
+      setSelectionPos({ top: 8, left: 12 });
     }
   }, []);
 
