@@ -3,16 +3,19 @@ import App from "./App.tsx";
 import "./index.css";
 import { initSettings } from "./lib/settingsStore";
 import { getSettings } from "./lib/settingsStore";
-import { registerNotificationWorker, scheduleDailyReminder } from "./lib/notifications";
+import { registerNotificationWorker, scheduleAllReminders } from "./lib/notifications";
+import { getDailyContent } from "./lib/dailyContent";
 
 initSettings();
 
 createRoot(document.getElementById("root")!).render(<App />);
 
-// Register the notification service worker and restore any daily reminder.
+// Register the notification service worker and restore every scheduled reminder.
 registerNotificationWorker().then(() => {
-  const settings = getSettings();
-  if (settings.dailyReminderEnabled && settings.dailyReminderTime) {
-    scheduleDailyReminder(settings.dailyReminderTime);
-  }
+  scheduleAllReminders(getSettings());
 });
+
+// Warm today's Word of the Day / Scripture of the Day cache so notifications
+// (and the home cards) carry real content.
+getDailyContent();
+
