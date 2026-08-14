@@ -86,7 +86,13 @@ export function useDevotionals() {
     await fetchDevotionals();
   }, [user, fetchDevotionals]);
 
-  return { devotionals, loading, saveDevotional, refetch: fetchDevotionals };
+  const deleteDevotional = useCallback(async (id: string) => {
+    setDevotionals((prev) => prev.filter((d) => d.id !== id));
+    await supabase.from("devotional_highlights").delete().eq("devotional_id", id);
+    await supabase.from("devotionals").delete().eq("id", id);
+  }, []);
+
+  return { devotionals, loading, saveDevotional, deleteDevotional, refetch: fetchDevotionals };
 }
 
 function mapRow(row: any): Devotional {

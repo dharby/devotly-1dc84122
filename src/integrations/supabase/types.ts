@@ -75,30 +75,36 @@ export type Database = {
         Row: {
           color: string
           created_at: string
-          devotional_id: string
+          devotional_id: string | null
           id: string
           note: string | null
           section: string
+          sermon_id: string | null
+          source_type: string
           text: string
           user_id: string
         }
         Insert: {
           color?: string
           created_at?: string
-          devotional_id: string
+          devotional_id?: string | null
           id?: string
           note?: string | null
           section?: string
+          sermon_id?: string | null
+          source_type?: string
           text: string
           user_id: string
         }
         Update: {
           color?: string
           created_at?: string
-          devotional_id?: string
+          devotional_id?: string | null
           id?: string
           note?: string | null
           section?: string
+          sermon_id?: string | null
+          source_type?: string
           text?: string
           user_id?: string
         }
@@ -108,6 +114,13 @@ export type Database = {
             columns: ["devotional_id"]
             isOneToOne: false
             referencedRelation: "devotionals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "devotional_highlights_sermon_id_fkey"
+            columns: ["sermon_id"]
+            isOneToOne: false
+            referencedRelation: "sermons"
             referencedColumns: ["id"]
           },
         ]
@@ -335,6 +348,42 @@ export type Database = {
           pinned?: boolean
           title?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_scriptures: {
+        Row: {
+          context: string | null
+          created_at: string
+          id: string
+          paraphrase: string
+          query: string
+          reference: string
+          snippet: string
+          themes: Json
+          user_id: string
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          id?: string
+          paraphrase?: string
+          query?: string
+          reference: string
+          snippet?: string
+          themes?: Json
+          user_id: string
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          id?: string
+          paraphrase?: string
+          query?: string
+          reference?: string
+          snippet?: string
+          themes?: Json
           user_id?: string
         }
         Relationships: []
