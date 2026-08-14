@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSermons, type SermonRecord } from "@/hooks/useSermons";
 import { sharePdf } from "@/lib/pdfExport";
+import ConfirmDelete from "@/components/ConfirmDelete";
+import SermonHighlighter from "@/components/SermonHighlighter";
+import { Input } from "@/components/ui/input";
 
 interface SermonPoint {
   heading: string;
@@ -67,6 +70,7 @@ export default function Sermon() {
   const [active, setActive] = useState<SermonRecord | null>(null);
   const [loading, setLoading] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
+  const [libQuery, setLibQuery] = useState("");
 
   useEffect(() => {
     if (searchParams.get("auto") === "1" && searchParams.get("topic") && !active && !loading) {
@@ -154,6 +158,15 @@ export default function Sermon() {
 
   const sermon = active?.content as SermonContent | undefined;
 
+  const filteredSermons = (() => {
+    const q = libQuery.trim().toLowerCase();
+    if (!q) return sermons;
+    return sermons.filter((s) =>
+      [s.title, s.topic, s.style, s.audience, s.notes, JSON.stringify(s.content ?? {})]
+        .filter(Boolean).join(" ").toLowerCase().includes(q),
+    );
+  })();
+
   return (
     <div className="min-h-screen pb-24">
       <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border px-4 py-3">
@@ -174,11 +187,19 @@ export default function Sermon() {
 
       {showLibrary ? (
         <div className="px-6 pt-6 animate-fade-in">
-          {sermons.length === 0 ? (
-            <p className="text-center text-sm text-muted-foreground py-12">No sermons yet. Generate your first one!</p>
+          <Input
+            value={libQuery}
+            onChange={(e) => setLibQuery(e.target.value)}
+            placeholder="Search saved sermons…"
+            className="rounded-xl bg-card mb-4"
+          />
+          {filteredSermons.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground py-12">
+              {sermons.length === 0 ? "No sermons yet. Generate your first one!" : "No sermons match that search."}
+            </p>
           ) : (
             <div className="space-y-3">
-              {sermons.map((s) => (
+              {filteredSermons.map((s) => (
                 <div key={s.id} className="bg-card rounded-xl p-4 border border-border">
                   <div className="flex items-start gap-3">
                     <button onClick={() => openSaved(s)} className="flex-1 text-left">
@@ -190,9 +211,16 @@ export default function Sermon() {
                       <p className="font-display font-semibold">{s.title}</p>
                       <p className="text-xs text-muted-foreground mt-1">{s.topic} · {new Date(s.createdAt).toLocaleDateString()}</p>
                     </button>
-                    <button onClick={() => removeSermon(s.id)} className="text-muted-foreground p-1">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <ConfirmDelete
+                      title="Delete this sermon?"
+                      description={`"${s.title}" and its notes will be permanently removed.`}
+                      onConfirm={() => removeSermon(s.id)}
+                      trigger={(open) => (
+                        <button onClick={open} className="text-muted-foreground p-1" aria-label="Delete sermon">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    />
                   </div>
                 </div>
               ))}
@@ -294,6 +322,7 @@ export default function Sermon() {
           </div>
         </div>
       ) : (
+        <SermonHighlighter sermonId={active.id}>
         <article className="px-6 pt-4 pb-10 animate-fade-in max-w-2xl mx-auto space-y-8">
           {/* Persistent action bar */}
           <div className="flex gap-2 -mb-2">
@@ -435,6 +464,7 @@ export default function Sermon() {
             <RefreshCw className="h-4 w-4 mr-2" /> Generate Another
           </Button>
         </article>
+        </SermonHighlighter>
       )}
     </div>
   );
