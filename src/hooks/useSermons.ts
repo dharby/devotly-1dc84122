@@ -32,6 +32,14 @@ function map(row: any): SermonRecord {
   };
 }
 
+export interface SermonHighlight {
+  id: string;
+  text: string;
+  section: string;
+  color: string;
+  note?: string;
+}
+
 export function useSermons() {
   const { user } = useAuth();
   const [sermons, setSermons] = useState<SermonRecord[]>([]);
@@ -80,5 +88,14 @@ export function useSermons() {
     setSermons((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
-  return { sermons, loading, createSermon, updateSermon, deleteSermon, refetch };
+  const getSermonHighlights = useCallback(async (sermonId: string) => {
+    if (!user) return [];
+    const { data } = await supabase
+      .from("devotional_highlights")
+      .select("id, text, section, color, note")
+      .eq("sermon_id", sermonId);
+    return data as SermonHighlight[];
+  }, [user]);
+
+  return { sermons, loading, createSermon, updateSermon, deleteSermon, refetch, getSermonHighlights };
 }

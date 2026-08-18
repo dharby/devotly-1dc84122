@@ -22,7 +22,9 @@ function schedule(kind, timeHHmm, content) {
   const delay = msUntil(timeHHmm);
   if (delay == null) return;
   timers[kind] = setTimeout(async () => {
-    await self.registration.showNotification(content.title, {
+    const reg = self.registration;
+    if (!reg) return;
+    await reg.showNotification(content.title, {
       body: content.body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",

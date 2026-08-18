@@ -11,6 +11,7 @@ import { sharePdf } from "@/lib/pdfExport";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import SermonHighlighter from "@/components/SermonHighlighter";
 import { Input } from "@/components/ui/input";
+import { useHighlights } from "@/hooks/useHighlights";
 
 interface SermonPoint {
   heading: string;
@@ -59,10 +60,38 @@ const suggestedTopics = [
   "The Cross", "Prayer that moves mountains",
 ];
 
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const renderHighlightedSermonText = (text: string, highlights: unknown) => {
+  const hs = highlights as any[];
+  if (!hs.length) return text;
+  const marks: string[] = [];
+  let result = text;
+  [...highlights]
+    .sort((a, b) => b.text.length - a.text.length)
+    .forEach((hl) => {
+      const needle = hl.text.trim();
+      if (!needle) return;
+      const colorClass = hl.color;
+      const pattern = new RegExp(escapeRegExp(escapeHtml(needle)).replace(/\s+/g, "\\s+"), "gi");
+      result = result.replace(pattern, (match) => {
+        const token = `\u0000H${marks.length}\u0000`;
+        marks.push(`<mark class="${colorClass} rounded px-0.5">${match}</mark>`);
+        return token;
+      });
+    });
+  marks.forEach((m, i) => { result = result.split(`\u0000H${i}\u0000`).join(m); });
+  return result;
+};
+
 export default function Sermon() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { sermons, createSermon, updateSermon, deleteSermon } = useSermons();
+  const { sermons, createSermon, updateSermon, deleteSermon, getSermonHighlights } = useSermons();
+const { highlights: sermonHighlights, addHighlight, removeHighlight } = useHighlights();
 
   const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const [style, setStyle] = useState("expository");
@@ -96,7 +125,7 @@ export default function Sermon() {
         toast.success("Sermon saved to your library");
       }
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e.message || "Failed to generate sermon");
     } finally {
       setLoading(false);
@@ -144,7 +173,6 @@ export default function Sermon() {
       ...(c.groupDiscussionQuestions?.length ? [{ heading: "Group Discussion Questions", text: c.groupDiscussionQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n") }] : []),
       ...(c.callToAction ? [{ heading: "Call to Action", text: c.callToAction }] : []),
       ...(c.closingPrayer ? [{ heading: "Closing Prayer", text: c.closingPrayer, italic: true }] : []),
-      ...(c.benediction ? [{ heading: "Benediction", text: c.benediction, italic: true }] : []),
     ];
     try {
       const result = await sharePdf({ title: c.title, subtitle: c.subtitle || active.topic, blocks, footer: "Devotly · Sermon & Bible Study" });
@@ -347,7 +375,7 @@ export default function Sermon() {
 
           <Section icon={<Quote className="h-4 w-4" />} label="Main Scripture" title={sermon.mainScriptureReference}>
             <blockquote className="border-l-4 border-primary/60 pl-4 italic text-foreground/90 whitespace-pre-line">
-              {sermon.mainScripture}
+              {renderHighlightedSermonText(sermon.mainScripture, sermonHighlights)}
             </blockquote>
           </Section>
 
@@ -357,7 +385,7 @@ export default function Sermon() {
           </div>
 
           <Section icon={<BookOpen className="h-4 w-4" />} label="Introduction">
-            <p className="whitespace-pre-line leading-relaxed">{sermon.introduction}</p>
+            <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(sermon.introduction, sermonHighlights)}</p>
           </Section>
 
           <Section label="Context">
@@ -390,19 +418,19 @@ export default function Sermon() {
                 <h2 className="font-display text-2xl font-bold leading-tight">{p.heading}</h2>
               </div>
               <blockquote className="border-l-4 border-primary/60 pl-4 italic text-sm text-foreground/80 whitespace-pre-line">
-                {p.scripture}
+                {renderHighlightedSermonText(p.scripture, sermonHighlights)}
               </blockquote>
               <div>
                 <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-1">Exposition</p>
-                <p className="whitespace-pre-line leading-relaxed">{p.exposition}</p>
+                <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(p.exposition, sermonHighlights)}</p>
               </div>
               <div className="bg-secondary/40 rounded-xl p-4">
                 <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-1">Illustration</p>
-                <p className="text-sm leading-relaxed">{p.illustration}</p>
+                <p className="text-sm leading-relaxed">{renderHighlightedSermonText(p.illustration, sermonHighlights)}</p>
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-1">Application</p>
-                <p className="text-sm leading-relaxed whitespace-pre-line">{p.application}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-line">{renderHighlightedSermonText(p.application, sermonHighlights)}</p>
               </div>
             </div>
           ))}
@@ -448,12 +476,12 @@ export default function Sermon() {
           </Section>
 
           <Section icon={<Heart className="h-4 w-4" />} label="Call to Action">
-            <p className="whitespace-pre-line leading-relaxed">{sermon.callToAction}</p>
+            <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(sermon.callToAction, sermonHighlights)}</p>
           </Section>
 
           <div className="bg-gradient-cathedral text-primary-foreground rounded-2xl p-6 shadow-cathedral">
             <p className="text-xs uppercase tracking-widest opacity-80 mb-2">Closing Prayer</p>
-            <p className="whitespace-pre-line leading-relaxed">{sermon.closingPrayer}</p>
+            <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(sermon.closingPrayer, sermonHighlights)}</p>
           </div>
 
           <div className="text-center italic font-display text-lg text-primary py-4 border-t border-border">
@@ -492,5 +520,7 @@ export function pushRecentTopic(topic: string, kind: "devotional" | "sermon") {
     const filtered = list.filter((x) => x.topic.toLowerCase() !== topic.toLowerCase());
     filtered.unshift({ topic, kind, at: Date.now() });
     localStorage.setItem(key, JSON.stringify(filtered.slice(0, 12)));
-  } catch {}
+  } catch (e) {
+      // ignore
+    }
 }

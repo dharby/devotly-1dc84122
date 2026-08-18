@@ -39,7 +39,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
 
   const { saveDevotional } = useDevotionals();
   const { markDayComplete } = useTracker();
-  const { highlights, addHighlight, removeHighlight } = useHighlights(devotional.id);
+  const { highlights, addHighlight, removeHighlight } = useHighlights(devotional.id, undefined);
 
   const handleSave = async () => {
     await saveDevotional({ ...devotional, saved: true });

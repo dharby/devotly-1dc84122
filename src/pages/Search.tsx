@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useDevotionals } from "@/hooks/useDevotionals";
 import { useSermons } from "@/hooks/useSermons";
 import { useNotes } from "@/hooks/useNotes";
+import { useHighlights, type StoredHighlight } from "@/hooks/useHighlights";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -43,12 +44,21 @@ function snippetAround(text: string, query: string, span = 120) {
   return (start > 0 ? "…" : "") + flat.slice(start, start + span) + (start + span < flat.length ? "…" : "");
 }
 
-function Highlighted({ text, query }: { text: string; query: string }) {
+function escapeHtml(s: string) {
+  return s.replace(/&/g, "&").replace(/</g, "<").replace(/>/g, ">");
+}
+
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const Highlighted = ({ text, query }: { text: string; query: string }) => {
   if (!query.trim()) return <>{text}</>;
-  const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"));
+  const escaped = escapeHtml(text);
+  const pattern = new RegExp(escapeRegExp(escapeHtml(query)).replace(/\s+/g, "\\s+"), "gi");
   return (
     <>
-      {parts.map((p, i) =>
+      {escaped.split(pattern).map((p, i) =>
         p.toLowerCase() === query.toLowerCase() ? (
           <mark key={i} className="bg-primary/25 text-foreground rounded px-0.5">{p}</mark>
         ) : (
@@ -57,7 +67,7 @@ function Highlighted({ text, query }: { text: string; query: string }) {
       )}
     </>
   );
-}
+};
 
 export default function Search() {
   const navigate = useNavigate();
@@ -65,17 +75,21 @@ export default function Search() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Kind>("all");
   const { devotionals } = useDevotionals();
-  const { sermons } = useSermons();
+  const { sermons, getSermonHighlights } = useSermons();
   const { notes } = useNotes();
-  const [highlights, setHighlights] = useState<{ id: string; text: string; color: string; devotional_id: string }[]>([]);
+  const { highlights, addHighlight, removeHighlight } = useHighlights(undefined, undefined);
 
   useEffect(() => {
     if (!user) return;
     supabase
       .from("devotional_highlights")
-      .select("id, text, color, devotional_id")
-      .then(({ data }) => data && setHighlights(data as any));
-  }, [user]);
+      .select("id, text, color, devotional_id, sermon_id")
+      .then(({ data }) => data && highlights.length > 0 && setHighlights(data as StoredHighlight[]));
+  }, [user, highlights.length]);
+
+  const highlightsRef = useMemo(() => {
+    return highlights || [];
+  }, [highlights]);
 
   const hits = useMemo<Hit[]>(() => {
     const q = query.trim().toLowerCase();
@@ -107,11 +121,16 @@ export default function Search() {
       }
     });
 
-    highlights.forEach((h) => {
+    highlightsRef.forEach((h) => {
       if (h.text?.toLowerCase().includes(q)) {
+        const source = h.devotional_id 
+          ? devotionals.find((d) => d.id === h.devotional_id)?.title 
+          : h.sermon_id 
+            ? sermons.find((s) => s.id === h.sermon_id)?.title ?? "Sermon study"
+            : "Devotional";
         out.push({
           id: h.id, kind: "highlight", title: "Highlight",
-          snippet: h.text, meta: devotionals.find((d) => d.id === h.devotional_id)?.title || "Devotional",
+          snippet: h.text, meta: source,
           onOpen: () => navigate("/saved"),
         });
       }
@@ -129,7 +148,7 @@ export default function Search() {
     });
 
     return filter === "all" ? out : out.filter((h) => h.kind === filter);
-  }, [query, filter, devotionals, sermons, notes, highlights, navigate]);
+  }, [query, filter, devotionals, sermons, notes, highlightsRef, navigate]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
@@ -144,7 +163,7 @@ export default function Search() {
           <button onClick={() => navigate(-1)} className="text-muted-foreground"><ChevronLeft className="h-5 w-5" /></button>
           <h1 className="font-display text-lg font-semibold flex-1">Search</h1>
         </div>
-        <div className="relative">
+        <div class="relative">
           <SearchIcon className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             autoFocus

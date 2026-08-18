@@ -67,7 +67,7 @@ const GenerateDevotional = () => {
       await saveDevotional(dev);
       pushRecentTopic(topic.trim(), "devotional");
       setDevotional(dev);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Generation error:", err);
       toast.error(err.message || "Failed to generate devotional. Please try again.");
     } finally {

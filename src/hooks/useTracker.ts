@@ -21,7 +21,7 @@ export function useTracker() {
       .select("date, completed, devotional_id")
       .order("date", { ascending: false });
     if (data) {
-      const days = data.map((r: any) => ({
+      const days = data.map((r) => ({
         date: r.date,
         completed: r.completed,
         devotionalId: r.devotional_id,

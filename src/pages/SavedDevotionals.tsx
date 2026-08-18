@@ -47,7 +47,7 @@ const SavedDevotionals = () => {
       devotionals
         .filter((d) => (savedOnly ? d.saved : true))
         .filter((d) => match(d.title, d.topic, d.scripture, d.scriptureReference, d.reflection, d.prayer, d.declaration)),
-    [devotionals, savedOnly, q],
+    [devotionals, savedOnly, q, match],
   );
 
   const serms = useMemo(
@@ -55,17 +55,17 @@ const SavedDevotionals = () => {
       sermons
         .filter((s) => (savedOnly ? s.bookmarked : true))
         .filter((s) => match(s.title, s.topic, s.style, s.notes, JSON.stringify(s.content ?? {}))),
-    [sermons, savedOnly, q],
+    [sermons, savedOnly, q, match],
   );
 
   const hls = useMemo(
     () => highlights.filter((h) => match(h.text, h.note, h.section)),
-    [highlights, q],
+    [highlights, q, match],
   );
 
   const scrs = useMemo(
     () => scriptures.filter((s) => match(s.reference, s.snippet, s.paraphrase, s.context, s.query)),
-    [scriptures, q],
+    [scriptures, q, match],
   );
 
   const counts: Record<Tab, number> = {

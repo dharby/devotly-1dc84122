@@ -62,7 +62,9 @@ const Index = () => {
     try {
       const raw = localStorage.getItem("recent_topics");
       if (raw) setRecentTopics(JSON.parse(raw));
-    } catch {}
+    } catch (e) {
+      // ignore
+    }
   }, []);
 
   const clearRecent = () => {
