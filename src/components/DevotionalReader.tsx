@@ -1,10 +1,11 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { BookOpen, Maximize2, Minimize2, Bookmark, CheckCircle2, RefreshCw, Search, X, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
 import { useTracker } from "@/hooks/useTracker";
 import { useHighlights } from "@/hooks/useHighlights";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { sharePdf } from "@/lib/pdfExport";
@@ -40,6 +41,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
   const { saveDevotional } = useDevotionals();
   const { markDayComplete } = useTracker();
   const { highlights, addHighlight, removeHighlight } = useHighlights(devotional.id, undefined);
+  const isMobile = useIsMobile();
 
   const handleSave = async () => {
     await saveDevotional({ ...devotional, saved: true });
@@ -53,9 +55,18 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     setCompleted(true);
   };
 
-  const handleTextSelect = useCallback(() => {
+  // Capture the current text selection and show the highlight bar.
+  // Uses selectionchange so it works reliably on touch devices (where the
+  // selection is committed slightly after touchend).
+  const captureSelection = useCallback(() => {
     const selection = window.getSelection();
-    if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+    if (!selection || selection.isCollapsed || !selection.toString().trim() || !contentRef.current) {
+      setSelectionPos(null);
+      return;
+    }
+    const a = selection.anchorNode;
+    const f = selection.focusNode;
+    if (!(a && f && contentRef.current.contains(a) && contentRef.current.contains(f))) {
       setSelectionPos(null);
       return;
     }
@@ -64,8 +75,8 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     try {
       const range = selection.getRangeAt(0);
       const rect = range.getBoundingClientRect();
-      const host = contentRef.current?.getBoundingClientRect();
-      if (!host || (rect.width === 0 && rect.height === 0)) {
+      const host = contentRef.current.getBoundingClientRect();
+      if (rect.width === 0 && rect.height === 0) {
         setSelectionPos({ top: 8, left: 12 });
         return;
       }
@@ -80,6 +91,11 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
       setSelectionPos({ top: 8, left: 12 });
     }
   }, []);
+
+  useEffect(() => {
+    document.addEventListener("selectionchange", captureSelection);
+    return () => document.removeEventListener("selectionchange", captureSelection);
+  }, [captureSelection]);
 
   // Click a highlighted <mark> to remove it (only when not selecting text).
   const handleMarkClick = (e: React.MouseEvent) => {
@@ -174,8 +190,8 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     <div
       className={cn("animate-fade-in relative reading", focusMode ? "focus-mode px-6 pt-4 pb-20" : "px-6 pt-6")}
       ref={contentRef}
-      onMouseUp={handleTextSelect}
-      onTouchEnd={handleTextSelect}
+      onMouseUp={captureSelection}
+      onTouchEnd={captureSelection}
       onClick={handleMarkClick}
     >
       {/* Toolbar */}
@@ -185,11 +201,16 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         </button>
       </div>
 
-      {/* Floating Highlight Bar — anchored near selection */}
+      {/* Floating Highlight Bar — anchored near selection on desktop, fixed bottom sheet on mobile */}
       {selectionPos && (
         <div
-          className="absolute z-50 bg-card border border-border rounded-full shadow-lg px-2 py-1.5 flex items-center gap-1 animate-fade-in"
-          style={{ top: selectionPos.top, left: selectionPos.left }}
+          className={cn(
+            "z-[60] bg-card border border-border shadow-lg flex items-center gap-1 animate-fade-in",
+            isMobile
+              ? "fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md justify-center rounded-2xl px-3 py-2.5"
+              : "absolute rounded-full px-2 py-1.5",
+          )}
+          style={!isMobile && selectionPos ? { top: selectionPos.top, left: selectionPos.left } : undefined}
           onMouseDown={(e) => e.preventDefault()}
           onTouchStart={(e) => e.stopPropagation()}
         >
