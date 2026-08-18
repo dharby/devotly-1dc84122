@@ -43,56 +43,62 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, [pathname]);
   return null;
 };
 
-const App = () => {
+const AppShell = () => {
   const location = useLocation();
   const showNav = !["/auth", "/reset-password"].includes(location.pathname);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AuthProvider>
-            <ScrollToTop />
-            <div className={cn("min-h-screen", showNav && "md:pl-64")}>
-              {showNav && <Sidebar />}
-              <div key={location.pathname} className="animate-fade-in min-h-screen">
-                <Routes>
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-                  <Route path="/generate" element={<ProtectedRoute><GenerateDevotional /></ProtectedRoute>} />
-                  <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
-                  <Route path="/saved" element={<ProtectedRoute><SavedDevotionals /></ProtectedRoute>} />
-                  <Route path="/family" element={<ProtectedRoute><Family /></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-                  <Route path="/prayer-timer" element={<ProtectedRoute><PrayerTimer /></ProtectedRoute>} />
-                  <Route path="/fasting" element={<ProtectedRoute><FastingTracker /></ProtectedRoute>} />
-                  <Route path="/sermon" element={<ProtectedRoute><Sermon /></ProtectedRoute>} />
-                  <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
-                  <Route path="/scripture" element={<ProtectedRoute><ScriptureSearch /></ProtectedRoute>} />
-                  <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
-                  <Route path="/reading-plan" element={<ProtectedRoute><ReadingPlan /></ProtectedRoute>} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </div>
-              {showNav && (
-                <div className="md:hidden">
-                  <BottomNav />
-                </div>
-              )}
-            </div>
-          </AuthProvider>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <>
+      <ScrollToTop />
+      <div className={cn("min-h-screen", showNav && "md:pl-64")}>
+        {showNav && <Sidebar />}
+        <div key={location.pathname} className="animate-fade-in min-h-screen">
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/generate" element={<ProtectedRoute><GenerateDevotional /></ProtectedRoute>} />
+            <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
+            <Route path="/saved" element={<ProtectedRoute><SavedDevotionals /></ProtectedRoute>} />
+            <Route path="/family" element={<ProtectedRoute><Family /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            <Route path="/prayer-timer" element={<ProtectedRoute><PrayerTimer /></ProtectedRoute>} />
+            <Route path="/fasting" element={<ProtectedRoute><FastingTracker /></ProtectedRoute>} />
+            <Route path="/sermon" element={<ProtectedRoute><Sermon /></ProtectedRoute>} />
+            <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+            <Route path="/scripture" element={<ProtectedRoute><ScriptureSearch /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+            <Route path="/reading-plan" element={<ProtectedRoute><ReadingPlan /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+        {showNav && (
+          <div className="md:hidden">
+            <BottomNav />
+          </div>
+        )}
+      </div>
+    </>
   );
 };
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <AuthProvider>
+          <AppShell />
+        </AuthProvider>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;
