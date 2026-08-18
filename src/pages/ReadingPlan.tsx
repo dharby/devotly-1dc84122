@@ -7,11 +7,12 @@ import { cn } from "@/lib/utils";
 import { useReadingPlan } from "@/hooks/useReadingPlan";
 import { getReadingForDay, PLAN_DAYS } from "@/lib/readingPlan";
 import { scheduleReminder, cancelReminder, requestNotificationPermission } from "@/lib/notifications";
+import ConfirmDelete from "@/components/ConfirmDelete";
 import { toast } from "sonner";
 
 const ReadingPlan = () => {
   const navigate = useNavigate();
-  const { plan, completedDays, loading, today, percent, startPlan, updatePlan, toggleDay, resetPlan } = useReadingPlan();
+  const { plan, completedDays, loading, today, percent, startPlan, updatePlan, toggleDay, resetPlan, cancelPlan } = useReadingPlan();
   const [viewDay, setViewDay] = useState<number | null>(null);
 
   const day = viewDay ?? today;
@@ -151,10 +152,31 @@ const ReadingPlan = () => {
             </div>
           </div>
 
-          <div className="px-6">
-            <button onClick={() => { resetPlan(); setViewDay(null); }} className="text-xs text-muted-foreground flex items-center gap-1">
-              <RotateCcw className="h-3 w-3" /> Restart the plan from today
-            </button>
+          <div className="px-6 flex flex-col gap-2">
+            <ConfirmDelete
+              title="Restart the plan?"
+              description="Your reading progress will be cleared and the plan will restart from today."
+              confirmLabel="Restart"
+              onConfirm={async () => { await resetPlan(); setViewDay(null); }}
+            >
+              {(open) => (
+                <Button variant="outline" className="w-full rounded-xl" onClick={open}>
+                  <RotateCcw className="h-4 w-4 mr-1" /> Restart plan
+                </Button>
+              )}
+            </ConfirmDelete>
+            <ConfirmDelete
+              title="Cancel the plan?"
+              description="The Bible reading plan and all your progress will be removed. You can start again anytime."
+              confirmLabel="Cancel plan"
+              onConfirm={async () => { await cancelPlan(); setViewDay(null); }}
+            >
+              {(open) => (
+                <Button variant="ghost" className="w-full rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10" onClick={open}>
+                  Cancel plan
+                </Button>
+              )}
+            </ConfirmDelete>
           </div>
         </>
       )}

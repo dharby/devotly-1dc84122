@@ -67,8 +67,16 @@ export function useReadingPlan() {
     await startPlan(new Date().toISOString().slice(0, 10));
   }, [user, startPlan]);
 
+  const cancelPlan = useCallback(async () => {
+    if (!user) return;
+    await supabase.from("bible_reading_progress").delete().eq("user_id", user.id);
+    await supabase.from("bible_reading_plans").delete().eq("user_id", user.id);
+    setCompletedDays([]);
+    setPlan(null);
+  }, [user]);
+
   const today = plan ? currentPlanDay(plan.start_date) : 1;
   const percent = Math.round((completedDays.length / PLAN_DAYS) * 100);
 
-  return { plan, completedDays, loading, today, percent, startPlan, updatePlan, toggleDay, resetPlan, refresh: fetchAll };
+  return { plan, completedDays, loading, today, percent, startPlan, updatePlan, toggleDay, resetPlan, cancelPlan, refresh: fetchAll };
 }

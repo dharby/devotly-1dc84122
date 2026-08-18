@@ -7,6 +7,7 @@ import { useDevotionals } from "@/hooks/useDevotionals";
 import { useSermons } from "@/hooks/useSermons";
 import { useSavedScriptures } from "@/hooks/useSavedScriptures";
 import EmptyState from "@/components/EmptyState";
+import ConfirmDelete from "@/components/ConfirmDelete";
 import { toast } from "sonner";
 
 type Tab = "devotionals" | "sermons" | "scriptures";
