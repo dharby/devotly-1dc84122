@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { BookOpen, Flame, Calendar, ArrowRight, Sparkles, Timer, UtensilsCrossed, Bookmark, Users, Lightbulb, ScrollText, History, X, Search, NotebookPen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDevotionals } from "@/hooks/useDevotionals";
+import { useSermons } from "@/hooks/useSermons";
 import { useTracker } from "@/hooks/useTracker";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
@@ -52,9 +53,11 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { devotionals } = useDevotionals();
+  const { sermons } = useSermons();
   const { streak, trackerDays } = useTracker();
   const dailySuggestion = getDailySuggestion();
   const totalDevotionals = devotionals.length;
+  const savedSermons = sermons.filter((s) => s.bookmarked).length;
   const completedDays = trackerDays.filter((d) => d.completed).length;
 
   const [recentTopics, setRecentTopics] = useState<RecentTopic[]>([]);
@@ -99,9 +102,10 @@ const Index = () => {
 
       {/* Quick Stats */}
       <div className="px-6 -mt-2">
-        <div className="grid grid-cols-3 gap-3 mb-8">
+        <div className="grid grid-cols-2 gap-3 mb-8">
           <StatCard icon={<Flame className="h-5 w-5 text-primary" />} value={streak} label="Day Streak" />
           <StatCard icon={<BookOpen className="h-5 w-5 text-primary" />} value={totalDevotionals} label="Devotionals" />
+          <StatCard icon={<ScrollText className="h-5 w-5 text-primary" />} value={savedSermons} label="Sermons" />
           <StatCard icon={<Calendar className="h-5 w-5 text-primary" />} value={completedDays} label="Days Active" />
         </div>
       </div>

@@ -19,7 +19,6 @@ import FastingTracker from "./pages/FastingTracker";
 import Sermon from "./pages/Sermon";
 import Notes from "./pages/Notes";
 import ScriptureSearch from "./pages/ScriptureSearch";
-import Search from "./pages/Search";
 import ReadingPlan from "./pages/ReadingPlan";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -72,7 +71,6 @@ const AppShell = () => {
             <Route path="/sermon" element={<ProtectedRoute><Sermon /></ProtectedRoute>} />
             <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
             <Route path="/scripture" element={<ProtectedRoute><ScriptureSearch /></ProtectedRoute>} />
-            <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/reading-plan" element={<ProtectedRoute><ReadingPlan /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

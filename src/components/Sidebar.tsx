@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, BookOpen, ScrollText, Bookmark, Search, CalendarDays, NotebookPen, Compass, Timer, UtensilsCrossed, Flame, Users, Settings, Cross } from "lucide-react";
+import { Home, BookOpen, ScrollText, Bookmark, Search, CalendarDays, NotebookPen, Timer, UtensilsCrossed, Flame, Users, Settings, Cross } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -19,7 +19,6 @@ const sections = [
       { icon: Search, label: "Scripture", path: "/scripture" },
       { icon: CalendarDays, label: "Reading Plans", path: "/reading-plan" },
       { icon: NotebookPen, label: "Notes", path: "/notes" },
-      { icon: Compass, label: "Explore", path: "/search" },
     ],
   },
   {

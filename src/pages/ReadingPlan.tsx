@@ -158,25 +158,23 @@ const ReadingPlan = () => {
               description="Your reading progress will be cleared and the plan will restart from today."
               confirmLabel="Restart"
               onConfirm={async () => { await resetPlan(); setViewDay(null); }}
-            >
-              {(open) => (
+              trigger={(open) => (
                 <Button variant="outline" className="w-full rounded-xl" onClick={open}>
                   <RotateCcw className="h-4 w-4 mr-1" /> Restart plan
                 </Button>
               )}
-            </ConfirmDelete>
+            />
             <ConfirmDelete
               title="Cancel the plan?"
               description="The Bible reading plan and all your progress will be removed. You can start again anytime."
               confirmLabel="Cancel plan"
               onConfirm={async () => { await cancelPlan(); setViewDay(null); }}
-            >
-              {(open) => (
+              trigger={(open) => (
                 <Button variant="ghost" className="w-full rounded-xl text-destructive hover:text-destructive hover:bg-destructive/10" onClick={open}>
                   Cancel plan
                 </Button>
               )}
-            </ConfirmDelete>
+            />
           </div>
         </>
       )}
