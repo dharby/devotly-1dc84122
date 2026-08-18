@@ -109,6 +109,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
   // Escape first, then match highlights with flexible whitespace so a selection
   // that spans several words, lines or paragraphs still highlights correctly.
   const renderHighlightedText = (text: string) => {
+    if (!text || typeof text !== "string") return text || "";
     const escaped = escapeHtml(text);
     if (!highlights.length) return escaped;
     const marks: string[] = [];

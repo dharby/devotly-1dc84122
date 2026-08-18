@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
+import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 import { initSettings, getSettings } from "./lib/settingsStore";
 import { registerNotificationWorker, scheduleReminder } from "./lib/notifications";
@@ -7,7 +8,11 @@ import { getDailyContent } from "./lib/dailyContent";
 
 initSettings();
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <ErrorBoundary>
+    <App />
+  </ErrorBoundary>
+);
 
 // Register the notification service worker and restore every scheduled reminder.
 registerNotificationWorker().then(() => {

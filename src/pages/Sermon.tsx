@@ -68,6 +68,7 @@ const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const renderHighlightedSermonText = (text: string, highlights: unknown) => {
   const hs = highlights as any[];
   if (!hs.length) return text;
+  if (!text || typeof text !== "string") return text;
   const marks: string[] = [];
   let result = text;
   [...highlights]
