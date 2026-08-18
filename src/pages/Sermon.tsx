@@ -80,7 +80,7 @@ const renderHighlightedSermonText = (text: string, highlights: unknown) => {
       const pattern = new RegExp(escapeRegExp(escapeHtml(needle)).replace(/\s+/g, "\\s+"), "gi");
       result = result.replace(pattern, (match) => {
         const token = `\u0000H${marks.length}\u0000`;
-        marks.push(`<mark class="${colorClass} rounded px-0.5">${match}</mark>`);
+        marks.push(`<mark class="${colorClass} rounded px-0.5 cursor-pointer" data-hid="${hl.id}">${match}</mark>`);
         return token;
       });
     });
@@ -142,6 +142,16 @@ export default function Sermon() {
     setActive({ ...active, completed: !active.completed });
     toast.success(!active.completed ? "Marked complete ✨" : "Marked incomplete");
   });
+
+  // Click a highlighted <mark> to remove it (only when not selecting text).
+  const handleMarkClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === "MARK" && target.dataset.hid) {
+      const selection = window.getSelection();
+      if (selection && selection.toString().trim().length > 0) return;
+      removeHighlight(target.dataset.hid);
+    }
+  };
 
   const removeSermon = async (id: string) => {
     await deleteSermon(id);
@@ -352,7 +362,7 @@ export default function Sermon() {
         </div>
       ) : (
         <SermonHighlighter sermonId={active.id}>
-        <article className="px-6 pt-4 pb-10 animate-fade-in max-w-2xl mx-auto space-y-8">
+        <article className="px-6 pt-4 pb-10 animate-fade-in max-w-2xl mx-auto space-y-8" onClick={handleMarkClick}>
           {/* Persistent action bar */}
           <div className="flex gap-2 -mb-2">
             <Button variant={active.bookmarked ? "golden" : "outline"} size="sm" className="flex-1 rounded-xl" onClick={toggleBookmark}>

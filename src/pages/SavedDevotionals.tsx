@@ -1,36 +1,26 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { BookOpen, Bookmark, Trash2, Search as SearchIcon, X, ScrollText, Highlighter, Quote, CheckCircle2 } from "lucide-react";
+import { BookOpen, Bookmark, Trash2, Search as SearchIcon, X, ScrollText, Quote, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useDevotionals } from "@/hooks/useDevotionals";
 import { useSermons } from "@/hooks/useSermons";
-import { useAllHighlights } from "@/hooks/useAllHighlights";
 import { useSavedScriptures } from "@/hooks/useSavedScriptures";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { toast } from "sonner";
 
-type Tab = "devotionals" | "sermons" | "highlights" | "scriptures";
+type Tab = "devotionals" | "sermons" | "scriptures";
 
 const TABS: { value: Tab; label: string }[] = [
   { value: "devotionals", label: "Devotionals" },
   { value: "sermons", label: "Sermons" },
-  { value: "highlights", label: "Highlights" },
   { value: "scriptures", label: "Scriptures" },
 ];
-
-const HIGHLIGHT_BG: Record<string, string> = {
-  yellow: "bg-yellow-200/60",
-  green: "bg-green-200/60",
-  blue: "bg-sky-200/60",
-  pink: "bg-pink-200/60",
-};
 
 const SavedDevotionals = () => {
   const navigate = useNavigate();
   const { devotionals, saveDevotional, deleteDevotional } = useDevotionals();
   const { sermons, updateSermon, deleteSermon } = useSermons();
-  const { highlights, deleteHighlight } = useAllHighlights();
   const { scriptures, deleteScripture } = useSavedScriptures();
 
   const [tab, setTab] = useState<Tab>("devotionals");
@@ -58,11 +48,6 @@ const SavedDevotionals = () => {
     [sermons, savedOnly, q, match],
   );
 
-  const hls = useMemo(
-    () => highlights.filter((h) => match(h.text, h.note, h.section)),
-    [highlights, q, match],
-  );
-
   const scrs = useMemo(
     () => scriptures.filter((s) => match(s.reference, s.snippet, s.paraphrase, s.context, s.query)),
     [scriptures, q, match],
@@ -70,8 +55,7 @@ const SavedDevotionals = () => {
 
   const counts: Record<Tab, number> = {
     devotionals: devs.length,
-    sermons: serms.length,
-    highlights: hls.length,
+    serms: serms.length,
     scriptures: scrs.length,
   };
 
@@ -79,11 +63,6 @@ const SavedDevotionals = () => {
     const d = devotionals.find((x) => x.id === id);
     if (d) await saveDevotional({ ...d, saved: !d.saved });
   };
-
-  const sourceLabel = (h: { devotional_id: string | null; sermon_id: string | null }) =>
-    h.sermon_id
-      ? sermons.find((s) => s.id === h.sermon_id)?.title ?? "Sermon study"
-      : devotionals.find((d) => d.id === h.devotional_id)?.title ?? "Devotional";
 
   return (
     <div className="min-h-screen pb-24">
@@ -234,34 +213,6 @@ const SavedDevotionals = () => {
                     )}
                   />
                 </div>
-              </div>
-            ))
-          )
-        )}
-
-        {tab === "highlights" && (
-          hls.length === 0 ? (
-            <Empty icon={<Highlighter className="h-12 w-12" />} text="Highlight text in a devotional or sermon to keep it here" />
-          ) : (
-            hls.map((h) => (
-              <div key={h.id} className="bg-card rounded-xl border border-border mb-3 p-4 flex items-start gap-3">
-                <div className="flex-1">
-                  <p className="text-[10px] uppercase tracking-widest text-primary font-semibold mb-1.5">
-                    {h.sermon_id ? "Sermon study" : "Devotional"} · {sourceLabel(h)}
-                  </p>
-                  <p className={cn("text-sm rounded px-1.5 py-0.5 inline", HIGHLIGHT_BG[h.color] ?? "bg-yellow-200/60")}>{h.text}</p>
-                  {h.note && <p className="text-xs text-muted-foreground mt-2 italic">{h.note}</p>}
-                  <p className="text-[10px] text-muted-foreground/70 mt-2">{new Date(h.created_at).toLocaleDateString()}</p>
-                </div>
-                <ConfirmDelete
-                  title="Delete this highlight?"
-                  onConfirm={async () => { await deleteHighlight(h.id); toast.success("Highlight deleted"); }}
-                  trigger={(open) => (
-                    <button onClick={open} className="text-muted-foreground p-1" aria-label="Delete highlight">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                />
               </div>
             ))
           )

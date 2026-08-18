@@ -25,7 +25,6 @@ const FILTERS: { value: Kind; label: string }[] = [
   { value: "all", label: "All" },
   { value: "devotional", label: "Devotionals" },
   { value: "sermon", label: "Sermons" },
-  { value: "highlight", label: "Highlights" },
   { value: "note", label: "Notes" },
 ];
 
@@ -131,7 +130,7 @@ export default function Search() {
         out.push({
           id: h.id, kind: "highlight", title: "Highlight",
           snippet: h.text, meta: source,
-          onOpen: () => navigate("/saved"),
+          onOpen: () => navigate(h.sermon_id ? `/sermon?open=${h.sermon_id}` : "/saved"),
         });
       }
     });

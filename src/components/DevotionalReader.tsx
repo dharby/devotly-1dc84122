@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { BookOpen, Maximize2, Minimize2, Bookmark, CheckCircle2, RefreshCw, Search, X, Highlighter, Share2 } from "lucide-react";
+import { BookOpen, Maximize2, Minimize2, Bookmark, CheckCircle2, RefreshCw, Search, X, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
@@ -81,6 +81,16 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
     }
   }, []);
 
+  // Click a highlighted <mark> to remove it (only when not selecting text).
+  const handleMarkClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.tagName === "MARK" && target.dataset.hid) {
+      const selection = window.getSelection();
+      if (selection && selection.toString().trim().length > 0) return;
+      removeHighlight(target.dataset.hid);
+    }
+  };
+
   const handleAddHighlight = async (color?: string) => {
     const selectedText = selectedTextRef.current;
     if (!selectedText) return;
@@ -123,7 +133,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         const pattern = new RegExp(escapeRegExp(escapeHtml(needle)).replace(/\s+/g, "\\s+"), "gi");
         result = result.replace(pattern, (match) => {
           const token = `\u0000H${marks.length}\u0000`;
-          marks.push(`<mark class="${colorClass} rounded px-0.5">${match}</mark>`);
+          marks.push(`<mark class="${colorClass} rounded px-0.5 cursor-pointer" data-hid="${hl.id}">${match}</mark>`);
           return token;
         });
       });
@@ -162,15 +172,10 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
       ref={contentRef}
       onMouseUp={handleTextSelect}
       onTouchEnd={handleTextSelect}
+      onClick={handleMarkClick}
     >
       {/* Toolbar */}
       <div className="flex items-center justify-end gap-2 mb-2">
-        {highlights.length > 0 && (
-          <span className="text-xs text-muted-foreground mr-auto">
-            <Highlighter className="h-3 w-3 inline mr-1" />
-            {highlights.length} highlight{highlights.length > 1 ? "s" : ""}
-          </span>
-        )}
         <button onClick={() => setFocusMode(!focusMode)} className="text-muted-foreground hover:text-foreground p-2 rounded-lg" title={focusMode ? "Exit focus mode" : "Focus mode"}>
           {focusMode ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
         </button>
@@ -272,26 +277,6 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         <div className="bg-muted rounded-xl p-5 mb-6 border border-primary/20">
           <h3 className="font-display text-lg font-semibold mb-2">✨ Declaration</h3>
           <p className="text-sm leading-relaxed text-foreground font-medium" dangerouslySetInnerHTML={{ __html: renderHighlightedText(devotional.declaration) }} />
-        </div>
-      )}
-
-      {/* Highlights List */}
-      {highlights.length > 0 && !focusMode && (
-        <div className="mb-6">
-          <h3 className="font-display text-sm font-semibold mb-2 flex items-center gap-1">
-            <Highlighter className="h-4 w-4 text-primary" /> Your Highlights
-          </h3>
-          <div className="space-y-2">
-            {highlights.map((hl) => {
-              const colorClass = HIGHLIGHT_COLORS.find((c) => c.value === hl.color)?.class || "";
-              return (
-                <div key={hl.id} className={cn("rounded-lg px-3 py-2 text-xs flex items-start gap-2", colorClass)}>
-                  <span className="flex-1 italic">"{hl.text}"</span>
-                  <button onClick={() => removeHighlight(hl.id)} className="text-muted-foreground shrink-0"><X className="h-3 w-3" /></button>
-                </div>
-              );
-            })}
-          </div>
         </div>
       )}
 
