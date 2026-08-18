@@ -66,5 +66,30 @@ export function useFasts() {
     await fetchFasts();
   }, [user, fasts, fetchFasts]);
 
-  return { fasts, loading, startFast, checkinFast };
+  const deleteFast = useCallback(async (fastId: string) => {
+    if (!user) return;
+    await supabase.from("fasts").delete().eq("id", fastId).eq("user_id", user.id);
+    await fetchFasts();
+  }, [user, fetchFasts]);
+
+  const updateFast = useCallback(async (
+    fastId: string,
+    updates: Partial<Pick<ActiveFast, "planId" | "planName" | "durationDays" | "startDate">>,
+  ) => {
+    if (!user) return;
+    const fast = fasts.find((f) => f.id === fastId);
+    if (!fast) return;
+    const merged = { ...fast, ...updates };
+    const completed = merged.checkins.length >= merged.durationDays;
+    await supabase.from("fasts").update({
+      plan_id: merged.planId,
+      plan_name: merged.planName,
+      duration_days: merged.durationDays,
+      start_date: merged.startDate,
+      completed,
+    }).eq("id", fastId).eq("user_id", user.id);
+    await fetchFasts();
+  }, [user, fasts, fetchFasts]);
+
+  return { fasts, loading, startFast, checkinFast, deleteFast, updateFast };
 }
