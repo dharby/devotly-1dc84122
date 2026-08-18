@@ -92,12 +92,12 @@ export default function Sermon() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { sermons, createSermon, updateSermon, deleteSermon, getSermonHighlights } = useSermons();
-const { highlights: sermonHighlights, addHighlight, removeHighlight } = useHighlights(undefined, active?.id);
+  const [active, setActive] = useState<SermonRecord | null>(null);
+  const { highlights: sermonHighlights, addHighlight, removeHighlight } = useHighlights(undefined, active?.id);
 
   const [topic, setTopic] = useState(searchParams.get("topic") || "");
   const [style, setStyle] = useState("expository");
   const [audience, setAudience] = useState("general");
-  const [active, setActive] = useState<SermonRecord | null>(null);
   const [loading, setLoading] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [libQuery, setLibQuery] = useState("");
