@@ -65,18 +65,25 @@ const escapeHtml = (s: string) =>
 
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
+const SERMON_HIGHLIGHT_CLASSES: Record<string, string> = {
+  yellow: "bg-yellow-300",
+  green: "bg-green-300",
+  blue: "bg-sky-300",
+  pink: "bg-pink-300",
+};
+
 const renderHighlightedSermonText = (text: string, highlights: unknown) => {
   const hs = highlights as any[];
   if (!hs.length) return text;
   if (!text || typeof text !== "string") return text;
   const marks: string[] = [];
-  let result = text;
+  let result = escapeHtml(text);
   [...highlights]
     .sort((a, b) => b.text.length - a.text.length)
     .forEach((hl) => {
       const needle = hl.text.trim();
       if (!needle) return;
-      const colorClass = hl.color;
+      const colorClass = SERMON_HIGHLIGHT_CLASSES[hl.color] || "bg-yellow-300";
       const pattern = new RegExp(escapeRegExp(escapeHtml(needle)).replace(/\s+/g, "\\s+"), "gi");
       result = result.replace(pattern, (match) => {
         const token = `\u0000H${marks.length}\u0000`;
@@ -396,9 +403,7 @@ export default function Sermon() {
           </header>
 
           <Section icon={<Quote className="h-4 w-4" />} label="Main Scripture" title={sermon.mainScriptureReference}>
-            <blockquote className="border-l-4 border-primary/60 pl-4 italic text-foreground/90 whitespace-pre-line">
-              {renderHighlightedSermonText(sermon.mainScripture, sermonHighlights)}
-            </blockquote>
+            <blockquote className="border-l-4 border-primary/60 pl-4 italic text-foreground/90 whitespace-pre-line" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(sermon.mainScripture, sermonHighlights) }} />
           </Section>
 
           <div className="bg-accent/50 border border-border rounded-2xl p-5">
@@ -407,7 +412,7 @@ export default function Sermon() {
           </div>
 
           <Section icon={<BookOpen className="h-4 w-4" />} label="Introduction">
-            <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(sermon.introduction, sermonHighlights)}</p>
+            <p className="whitespace-pre-line leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(sermon.introduction, sermonHighlights) }} />
           </Section>
 
           <Section label="Context">
@@ -439,20 +444,18 @@ export default function Sermon() {
                 <span className="font-display text-4xl text-primary/40 font-bold">{i + 1}</span>
                 <h2 className="font-display text-2xl font-bold leading-tight">{p.heading}</h2>
               </div>
-              <blockquote className="border-l-4 border-primary/60 pl-4 italic text-sm text-foreground/80 whitespace-pre-line">
-                {renderHighlightedSermonText(p.scripture, sermonHighlights)}
-              </blockquote>
+                <blockquote className="border-l-4 border-primary/60 pl-4 italic text-sm text-foreground/80 whitespace-pre-line" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(p.scripture, sermonHighlights) }} />
               <div>
                 <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-1">Exposition</p>
-                <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(p.exposition, sermonHighlights)}</p>
+                <p className="whitespace-pre-line leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(p.exposition, sermonHighlights) }} />
               </div>
               <div className="bg-secondary/40 rounded-xl p-4">
                 <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-1">Illustration</p>
-                <p className="text-sm leading-relaxed">{renderHighlightedSermonText(p.illustration, sermonHighlights)}</p>
+                <p className="text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(p.illustration, sermonHighlights) }} />
               </div>
               <div>
                 <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-1">Application</p>
-                <p className="text-sm leading-relaxed whitespace-pre-line">{renderHighlightedSermonText(p.application, sermonHighlights)}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-line" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(p.application, sermonHighlights) }} />
               </div>
             </div>
           ))}
@@ -498,12 +501,12 @@ export default function Sermon() {
           </Section>
 
           <Section icon={<Heart className="h-4 w-4" />} label="Call to Action">
-            <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(sermon.callToAction, sermonHighlights)}</p>
+            <p className="whitespace-pre-line leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(sermon.callToAction, sermonHighlights) }} />
           </Section>
 
           <div className="bg-gradient-cathedral text-primary-foreground rounded-2xl p-6 shadow-cathedral">
             <p className="text-xs uppercase tracking-widest opacity-80 mb-2">Closing Prayer</p>
-            <p className="whitespace-pre-line leading-relaxed">{renderHighlightedSermonText(sermon.closingPrayer, sermonHighlights)}</p>
+            <p className="whitespace-pre-line leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHighlightedSermonText(sermon.closingPrayer, sermonHighlights) }} />
           </div>
 
           <div className="text-center italic font-display text-lg text-primary py-4 border-t border-border">
