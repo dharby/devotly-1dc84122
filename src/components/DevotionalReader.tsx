@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { useDevotionals, type Devotional } from "@/hooks/useDevotionals";
 import { useTracker } from "@/hooks/useTracker";
 import { useHighlights } from "@/hooks/useHighlights";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { sharePdf } from "@/lib/pdfExport";
@@ -41,7 +40,6 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
   const { saveDevotional } = useDevotionals();
   const { markDayComplete } = useTracker();
   const { highlights, addHighlight, removeHighlight } = useHighlights(devotional.id, undefined);
-  const isMobile = useIsMobile();
 
   const handleSave = async () => {
     await saveDevotional({ ...devotional, saved: true });
@@ -80,13 +78,13 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         setSelectionPos({ top: 8, left: 12 });
         return;
       }
-      // Position relative to the reader container (the pill's offset parent).
+      // Position relative to the reader container (the pill's offset parent),
+      // centered over the selection and clamped to stay fully on-screen.
+      const barW = 240;
       const top = Math.max(4, rect.top - host.top - 50);
-      const left = Math.min(
-        host.width - 210,
-        Math.max(4, rect.left - host.left + rect.width / 2 - 105),
-      );
-      setSelectionPos({ top, left });
+      const left = rect.left - host.left + rect.width / 2 - barW / 2;
+      const clampedLeft = Math.max(4, Math.min(Math.max(4, host.width - barW - 4), left));
+      setSelectionPos({ top, left: clampedLeft });
     } catch {
       setSelectionPos({ top: 8, left: 12 });
     }
@@ -193,6 +191,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
       onMouseUp={captureSelection}
       onTouchEnd={captureSelection}
       onClick={handleMarkClick}
+      style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
     >
       {/* Toolbar */}
       <div className="flex items-center justify-end gap-2 mb-2">
@@ -201,16 +200,11 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
         </button>
       </div>
 
-      {/* Floating Highlight Bar — anchored near selection on desktop, fixed bottom sheet on mobile */}
+      {/* Floating Highlight Bar — anchored near the selection (same on desktop & mobile) */}
       {selectionPos && (
         <div
-          className={cn(
-            "z-[60] bg-card border border-border shadow-lg flex items-center gap-1 animate-fade-in",
-            isMobile
-              ? "fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md justify-center rounded-2xl px-3 py-2.5"
-              : "absolute rounded-full px-2 py-1.5",
-          )}
-          style={!isMobile && selectionPos ? { top: selectionPos.top, left: selectionPos.left } : undefined}
+          className="absolute z-[60] bg-card border border-border shadow-lg rounded-full px-2 py-1.5 flex items-center gap-1 animate-fade-in max-w-[calc(100%-2rem)]"
+          style={{ top: selectionPos.top, left: selectionPos.left }}
           onMouseDown={(e) => e.preventDefault()}
           onTouchStart={(e) => e.stopPropagation()}
         >

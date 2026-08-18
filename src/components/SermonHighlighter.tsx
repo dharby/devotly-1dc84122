@@ -1,7 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Highlighter } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import { toast } from "sonner";
 
 const COLORS = [
@@ -20,7 +18,6 @@ export default function SermonHighlighter({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pill, setPill] = useState<{ top: number; left: number; text: string } | null>(null);
-  const isMobile = useIsMobile();
 
   const captureSelection = useCallback(() => {
     const sel = window.getSelection();
@@ -42,7 +39,11 @@ export default function SermonHighlighter({
     try {
       const rect = sel.getRangeAt(0).getBoundingClientRect();
       const base = containerRef.current.getBoundingClientRect();
-      setPill({ top: rect.top - base.top - 46, left: Math.max(8, rect.left - base.left), text });
+      const barW = 200;
+      const top = Math.max(4, rect.top - base.top - 46);
+      const left = rect.left - base.left + rect.width / 2 - barW / 2;
+      const clampedLeft = Math.max(4, Math.min(Math.max(4, base.width - barW - 4), left));
+      setPill({ top, left: clampedLeft, text });
     } catch {
       setPill({ top: 8, left: 8, text });
     }
@@ -66,17 +67,18 @@ export default function SermonHighlighter({
   };
 
   return (
-    <div ref={containerRef} className="relative" onMouseUp={captureSelection} onTouchEnd={captureSelection}>
+    <div
+      ref={containerRef}
+      className="relative"
+      onMouseUp={captureSelection}
+      onTouchEnd={captureSelection}
+      style={{ WebkitTouchCallout: "none" } as React.CSSProperties}
+    >
       {children}
       {pill && (
         <div
-          style={!isMobile && pill ? { top: pill.top, left: pill.left } : undefined}
-          className={cn(
-            "z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 shadow-lg animate-fade-in",
-            isMobile
-              ? "fixed bottom-[5.5rem] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md justify-center rounded-2xl"
-              : "absolute",
-          )}
+          style={{ top: pill.top, left: pill.left }}
+          className="absolute z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 shadow-lg animate-fade-in max-w-[calc(100%-2rem)]"
         >
           <Highlighter className="h-3.5 w-3.5 text-primary" />
           {COLORS.map((c) => (
