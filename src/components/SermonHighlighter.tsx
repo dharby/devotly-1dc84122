@@ -78,6 +78,7 @@ export default function SermonHighlighter({
       {pill && (
         <div
           style={{ top: pill.top, left: pill.left }}
+          onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
           className="absolute z-[60] flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 shadow-lg animate-fade-in max-w-[calc(100%-2rem)]"
         >
           <Highlighter className="h-3.5 w-3.5 text-primary" />
@@ -86,6 +87,7 @@ export default function SermonHighlighter({
               key={c.name}
               aria-label={`Highlight ${c.name}`}
               onClick={() => save(c.name)}
+              onTouchEnd={(e) => { e.preventDefault(); save(c.name); }}
               className={`h-5 w-5 rounded-full ${c.cls} ring-1 ring-border`}
             />
           ))}

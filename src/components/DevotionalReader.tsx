@@ -206,21 +206,30 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
           className="absolute z-[60] bg-card border border-border shadow-lg rounded-full px-2 py-1.5 flex items-center gap-1 animate-fade-in max-w-[calc(100%-2rem)]"
           style={{ top: selectionPos.top, left: selectionPos.left }}
           onMouseDown={(e) => e.preventDefault()}
-          onTouchStart={(e) => e.stopPropagation()}
+          onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); }}
         >
           {HIGHLIGHT_COLORS.map((c) => (
             <button
               key={c.value}
               onClick={() => { setHighlightColor(c.value); handleAddHighlight(c.value); }}
+              onTouchEnd={(e) => { e.preventDefault(); setHighlightColor(c.value); handleAddHighlight(c.value); }}
               className={cn("w-7 h-7 rounded-full transition-transform hover:scale-110", c.class)}
               title={`Highlight ${c.value}`}
             />
           ))}
           <div className="w-px h-6 bg-border mx-1" />
-          <button onClick={lookupWord} className="px-2 py-1 text-xs font-medium text-foreground hover:text-primary flex items-center gap-1">
+          <button
+            onClick={lookupWord}
+            onTouchEnd={(e) => { e.preventDefault(); lookupWord(); }}
+            className="px-2 py-1 text-xs font-medium text-foreground hover:text-primary flex items-center gap-1"
+          >
             <Search className="h-3 w-3" /> Define
           </button>
-          <button onClick={() => setSelectionPos(null)} className="text-muted-foreground p-1"><X className="h-3 w-3" /></button>
+          <button
+            onClick={() => setSelectionPos(null)}
+            onTouchEnd={(e) => { e.preventDefault(); setSelectionPos(null); }}
+            className="text-muted-foreground p-1"
+          ><X className="h-3 w-3" /></button>
           <span className="sr-only">Highlight selection</span>
         </div>
       )}
