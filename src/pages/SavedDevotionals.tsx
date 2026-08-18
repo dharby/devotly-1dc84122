@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { useDevotionals } from "@/hooks/useDevotionals";
 import { useSermons } from "@/hooks/useSermons";
 import { useSavedScriptures } from "@/hooks/useSavedScriptures";
-import ConfirmDelete from "@/components/ConfirmDelete";
+import EmptyState from "@/components/EmptyState";
 import { toast } from "sonner";
 
 type Tab = "devotionals" | "sermons" | "scriptures";
@@ -113,10 +113,14 @@ const SavedDevotionals = () => {
         </div>
       )}
 
-      <div className="px-6 pt-4">
+      <div className="px-6 pt-4 stagger">
         {tab === "devotionals" && (
           devs.length === 0 ? (
-            <Empty icon={<BookOpen className="h-12 w-12" />} text="No devotionals here yet" />
+            <EmptyState
+              icon={<BookOpen className="h-7 w-7" />}
+              title="No devotionals yet"
+              description="Generate your first devotional to begin your daily walk."
+            />
           ) : (
             devs.map((d) => (
               <div key={d.id} className="bg-card rounded-xl border border-border mb-3 overflow-hidden">
@@ -181,7 +185,11 @@ const SavedDevotionals = () => {
 
         {tab === "sermons" && (
           serms.length === 0 ? (
-            <Empty icon={<ScrollText className="h-12 w-12" />} text="No sermons here yet" />
+            <EmptyState
+              icon={<ScrollText className="h-7 w-7" />}
+              title="No sermons yet"
+              description="Create a full sermon & Bible study on any passage or topic."
+            />
           ) : (
             serms.map((s) => (
               <div key={s.id} className="bg-card rounded-xl border border-border mb-3 p-4 flex items-start gap-3">
@@ -220,7 +228,11 @@ const SavedDevotionals = () => {
 
         {tab === "scriptures" && (
           scrs.length === 0 ? (
-            <Empty icon={<Quote className="h-12 w-12" />} text="Save results from Scripture search to keep them here" />
+            <EmptyState
+              icon={<Quote className="h-7 w-7" />}
+              title="No saved scriptures"
+              description="Save results from Scripture search to keep them here."
+            />
           ) : (
             scrs.map((s) => (
               <div key={s.id} className="bg-card rounded-xl border border-border mb-3 p-4 flex items-start gap-3">
@@ -248,12 +260,5 @@ const SavedDevotionals = () => {
     </div>
   );
 };
-
-const Empty = ({ icon, text }: { icon: React.ReactNode; text: string }) => (
-  <div className="text-center py-16">
-    <div className="text-muted-foreground/40 mx-auto mb-3 flex justify-center">{icon}</div>
-    <p className="text-muted-foreground text-sm">{text}</p>
-  </div>
-);
 
 export default SavedDevotionals;

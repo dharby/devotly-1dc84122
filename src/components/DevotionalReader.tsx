@@ -172,7 +172,7 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
 
   return (
     <div
-      className={cn("animate-fade-in relative", focusMode ? "focus-mode px-6 pt-4 pb-20" : "px-6 pt-6")}
+      className={cn("animate-fade-in relative reading", focusMode ? "focus-mode px-6 pt-4 pb-20" : "px-6 pt-6")}
       ref={contentRef}
       onMouseUp={handleTextSelect}
       onTouchEnd={handleTextSelect}

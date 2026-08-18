@@ -194,7 +194,7 @@ const Index = () => {
 
 
       {/* Suggested Topics — generate as devotional OR sermon */}
-      <div className="px-6 mb-8">
+      <div className="px-6 mb-8 stagger">
         <h3 className="font-display text-lg font-semibold mb-3">Suggested Topics</h3>
         <div className="space-y-2">
           {["Faith", "Love", "Anxiety", "Purpose", "Gratitude", "Marriage", "Peace", "Strength", "Forgiveness", "Hope"].map((topic) => (
@@ -244,7 +244,7 @@ const Index = () => {
       )}
 
       {/* Recent Devotionals */}
-      <div className="px-6">
+      <div className="px-6 stagger">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-display text-lg font-semibold">Recent Devotionals</h3>
           <button onClick={() => navigate("/saved")} className="text-xs text-primary font-medium flex items-center gap-1">

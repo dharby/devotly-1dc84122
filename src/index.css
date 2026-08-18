@@ -6,97 +6,97 @@
 
 @layer base {
   :root {
-    /* Cathedral: warm ivory background, deep aubergine primary, dusty rose accent, sage secondary */
-    --background: 36 40% 97%;
-    --foreground: 285 25% 15%;
+    /* Cathedral: warm ivory background, gold primary, dusty rose accent, sage secondary */
+    --background: 38 38% 96%;
+    --foreground: 28 20% 15%;
 
-    --card: 36 45% 99%;
-    --card-foreground: 285 25% 15%;
+    --card: 38 42% 99%;
+    --card-foreground: 28 20% 15%;
 
-    --popover: 36 45% 99%;
-    --popover-foreground: 285 25% 15%;
+    --popover: 38 42% 99%;
+    --popover-foreground: 28 20% 15%;
 
-    --primary: 285 40% 32%;
-    --primary-foreground: 36 45% 98%;
+    --primary: 32 72% 46%;
+    --primary-foreground: 28 45% 12%;
 
     --secondary: 150 20% 88%;
-    --secondary-foreground: 150 25% 22%;
+    --secondary-foreground: 150 28% 22%;
 
-    --muted: 36 25% 92%;
-    --muted-foreground: 285 10% 45%;
+    --muted: 36 22% 91%;
+    --muted-foreground: 28 12% 42%;
 
-    --accent: 12 55% 90%;
-    --accent-foreground: 12 40% 30%;
+    --accent: 14 62% 90%;
+    --accent-foreground: 14 48% 30%;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 65% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 36 20% 88%;
-    --input: 36 20% 88%;
-    --ring: 285 40% 32%;
+    --border: 36 18% 86%;
+    --input: 36 18% 86%;
+    --ring: 32 72% 46%;
 
     --radius: 0.9rem;
 
-    --warm: 12 55% 60%;
-    --warm-foreground: 36 45% 98%;
-    --golden-glow: 12 70% 70%;
-    --sage: 150 25% 55%;
+    --warm: 14 62% 60%;
+    --warm-foreground: 38 45% 98%;
+    --golden-glow: 38 82% 66%;
+    --sage: 150 26% 50%;
 
-    --sidebar-background: 36 40% 97%;
-    --sidebar-foreground: 285 25% 15%;
-    --sidebar-primary: 285 40% 32%;
-    --sidebar-primary-foreground: 36 45% 98%;
-    --sidebar-accent: 12 55% 90%;
-    --sidebar-accent-foreground: 12 40% 30%;
-    --sidebar-border: 36 20% 88%;
-    --sidebar-ring: 285 40% 32%;
+    --sidebar-background: 38 38% 95%;
+    --sidebar-foreground: 28 20% 15%;
+    --sidebar-primary: 32 72% 46%;
+    --sidebar-primary-foreground: 28 45% 12%;
+    --sidebar-accent: 14 62% 90%;
+    --sidebar-accent-foreground: 14 48% 30%;
+    --sidebar-border: 36 18% 86%;
+    --sidebar-ring: 32 72% 46%;
 
     --font-display: 'Fraunces', Georgia, serif;
     --font-body: 'Manrope', system-ui, sans-serif;
   }
 
   .dark {
-    --background: 285 25% 9%;
-    --foreground: 36 30% 92%;
+    --background: 28 18% 9%;
+    --foreground: 40 22% 90%;
 
-    --card: 285 22% 13%;
-    --card-foreground: 36 30% 92%;
+    --card: 28 16% 13%;
+    --card-foreground: 40 22% 90%;
 
-    --popover: 285 22% 13%;
-    --popover-foreground: 36 30% 92%;
+    --popover: 28 16% 13%;
+    --popover-foreground: 40 22% 90%;
 
-    --primary: 12 65% 70%;
-    --primary-foreground: 285 30% 12%;
+    --primary: 38 86% 60%;
+    --primary-foreground: 28 50% 10%;
 
-    --secondary: 150 15% 22%;
+    --secondary: 150 14% 22%;
     --secondary-foreground: 150 20% 82%;
 
-    --muted: 285 15% 18%;
-    --muted-foreground: 36 15% 65%;
+    --muted: 28 14% 18%;
+    --muted-foreground: 40 12% 62%;
 
-    --accent: 12 30% 22%;
-    --accent-foreground: 12 55% 85%;
+    --accent: 14 32% 22%;
+    --accent-foreground: 14 55% 85%;
 
-    --destructive: 0 62% 40%;
+    --destructive: 0 62% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 285 18% 22%;
-    --input: 285 18% 22%;
-    --ring: 12 65% 70%;
+    --border: 28 14% 20%;
+    --input: 28 14% 20%;
+    --ring: 38 86% 60%;
 
-    --warm: 12 55% 55%;
-    --warm-foreground: 36 45% 98%;
-    --golden-glow: 12 65% 65%;
+    --warm: 14 55% 58%;
+    --warm-foreground: 38 45% 98%;
+    --golden-glow: 38 84% 64%;
     --sage: 150 20% 45%;
 
-    --sidebar-background: 285 22% 11%;
-    --sidebar-foreground: 36 30% 92%;
-    --sidebar-primary: 12 65% 70%;
-    --sidebar-primary-foreground: 285 30% 12%;
-    --sidebar-accent: 12 30% 22%;
-    --sidebar-accent-foreground: 12 55% 85%;
-    --sidebar-border: 285 18% 22%;
-    --sidebar-ring: 12 65% 70%;
+    --sidebar-background: 28 18% 11%;
+    --sidebar-foreground: 40 22% 90%;
+    --sidebar-primary: 38 86% 60%;
+    --sidebar-primary-foreground: 28 50% 10%;
+    --sidebar-accent: 14 32% 22%;
+    --sidebar-accent-foreground: 14 55% 85%;
+    --sidebar-border: 28 14% 20%;
+    --sidebar-ring: 38 86% 60%;
   }
 }
 
@@ -106,6 +106,10 @@
     @apply bg-background text-foreground;
     font-family: var(--font-body);
     font-feature-settings: "ss01", "ss02";
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
@@ -119,31 +123,31 @@
   .font-body { font-family: var(--font-body); }
 
   .text-gradient-cathedral {
-    background: linear-gradient(135deg, hsl(285 40% 32%), hsl(12 55% 60%));
+    background: linear-gradient(135deg, hsl(32 72% 46%), hsl(14 62% 58%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .bg-gradient-warm {
-    background: linear-gradient(160deg, hsl(36 40% 97%), hsl(12 40% 94%));
+    background: linear-gradient(160deg, hsl(38 40% 97%), hsl(14 40% 94%));
   }
   .bg-gradient-cathedral {
-    background: linear-gradient(135deg, hsl(285 45% 28%) 0%, hsl(315 35% 40%) 55%, hsl(12 55% 60%) 100%);
+    background: linear-gradient(135deg, hsl(32 70% 44%) 0%, hsl(18 65% 52%) 55%, hsl(40 85% 64%) 100%);
   }
   .bg-gradient-golden { /* legacy alias -> cathedral */
-    background: linear-gradient(135deg, hsl(285 45% 28%) 0%, hsl(315 35% 40%) 55%, hsl(12 55% 60%) 100%);
+    background: linear-gradient(135deg, hsl(32 70% 44%) 0%, hsl(18 65% 52%) 55%, hsl(40 85% 64%) 100%);
   }
   .shadow-cathedral {
-    box-shadow: 0 10px 40px -12px hsl(285 40% 32% / 0.35);
+    box-shadow: 0 10px 40px -12px hsl(32 72% 46% / 0.35);
   }
   .shadow-warm {
-    box-shadow: 0 4px 20px -4px hsl(285 40% 32% / 0.15);
+    box-shadow: 0 4px 20px -4px hsl(32 72% 46% / 0.15);
   }
   .shadow-golden {
-    box-shadow: 0 10px 40px -12px hsl(285 40% 32% / 0.35);
+    box-shadow: 0 10px 40px -12px hsl(32 72% 46% / 0.35);
   }
   .text-gradient-golden {
-    background: linear-gradient(135deg, hsl(285 40% 32%), hsl(12 55% 60%));
+    background: linear-gradient(135deg, hsl(32 72% 46%), hsl(14 62% 58%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -169,6 +173,53 @@
 [data-font-size="lg"] body { font-size: 18px; }
 [data-font-size="xl"] body { font-size: 20px; }
 
+/* Reading comfort for long-form devotional / sermon text */
+.reading {
+  line-height: 1.85;
+  font-size: 1.0625rem;
+  text-wrap: pretty;
+}
+
+/* Staggered list reveal */
+.stagger > * {
+  animation: fade-in 0.5s ease-out both;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.03s; }
+.stagger > *:nth-child(2) { animation-delay: 0.07s; }
+.stagger > *:nth-child(3) { animation-delay: 0.11s; }
+.stagger > *:nth-child(4) { animation-delay: 0.15s; }
+.stagger > *:nth-child(5) { animation-delay: 0.19s; }
+.stagger > *:nth-child(6) { animation-delay: 0.23s; }
+.stagger > *:nth-child(7) { animation-delay: 0.27s; }
+.stagger > *:nth-child(8) { animation-delay: 0.31s; }
+.stagger > *:nth-child(9) { animation-delay: 0.35s; }
+.stagger > *:nth-child(10) { animation-delay: 0.39s; }
+
+/* Highlight pop when a mark is created / rendered */
+@keyframes mark-pop {
+  0% { transform: scale(0.9); filter: brightness(1.5); }
+  60% { transform: scale(1.02); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+mark {
+  animation: mark-pop 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: filter 0.2s ease;
+  cursor: pointer;
+}
+mark:hover {
+  filter: brightness(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  mark { animation: none; }
+}
+
 .focus-mode {
   position: fixed;
   inset: 0;
@@ -177,5 +228,5 @@
   background: hsl(var(--background));
 }
 .dark .focus-mode {
-  background: hsl(285 25% 7%);
+  background: hsl(28 18% 9%);
 }

@@ -380,7 +380,7 @@ export default function Sermon() {
         </div>
       ) : (
         <SermonHighlighter addHighlight={addHighlight}>
-        <article className="px-6 pt-4 pb-10 animate-fade-in max-w-2xl mx-auto space-y-8" onClick={handleMarkClick}>
+        <article className="px-6 pt-4 pb-10 animate-fade-in reading max-w-2xl mx-auto space-y-8" onClick={handleMarkClick}>
           {/* Persistent action bar */}
           <div className="flex gap-2 -mb-2">
             <Button variant={active.bookmarked ? "golden" : "outline"} size="sm" className="flex-1 rounded-xl" onClick={toggleBookmark}>
