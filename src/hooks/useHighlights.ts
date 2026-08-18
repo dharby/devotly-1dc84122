@@ -45,20 +45,21 @@ export function useHighlights(devotionalId?: string, sermonId?: string) {
 
   useEffect(() => { fetch(); }, [fetch]);
 
-  const addHighlight = useCallback(async (hl: Omit<Highlight, "id"> & { source_type: "sermon" | "devotional"; devotional_id?: string; sermon_id?: string }) => {
-    if (!user) return;
-    const { data } = await supabase.from("devotional_highlights").insert({
+  const addHighlight = useCallback(async (hl: { text: string; section: string; color: string; note?: string }) => {
+    if (!user) throw new Error("Sign in to save highlights");
+    const { data, error } = await supabase.from("devotional_highlights").insert({
       user_id: user.id,
-      devotional_id: hl.devotional_id,
-      sermon_id: hl.sermon_id,
+      devotional_id: devotionalId ?? null,
+      sermon_id: sermonId ?? null,
       text: hl.text,
       section: hl.section,
       color: hl.color,
       note: hl.note || null,
-      source_type: hl.source_type,
+      source_type: devotionalId ? "devotional" : "sermon",
     }).select("id, text, section, color, note").single();
+    if (error) throw error;
     if (data) setHighlights((prev) => [...prev, data as Highlight]);
-  }, [user]);
+  }, [user, devotionalId, sermonId]);
 
   const removeHighlight = useCallback(async (id: string) => {
     await supabase.from("devotional_highlights").delete().eq("id", id);

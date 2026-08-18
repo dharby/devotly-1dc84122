@@ -1,7 +1,5 @@
 import { useRef, useState } from "react";
 import { Highlighter } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 const COLORS = [
@@ -12,16 +10,14 @@ const COLORS = [
 ];
 
 export default function SermonHighlighter({
-  sermonId,
+  addHighlight,
   children,
 }: {
-  sermonId: string;
+  addHighlight: (hl: { text: string; section: string; color: string; note?: string }) => Promise<void>;
   children: React.ReactNode;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pill, setPill] = useState<{ top: number; left: number; text: string } | null>(null);
-
-  const { user } = useAuth();
 
   const onSelect = () => {
     const sel = window.getSelection();
@@ -37,17 +33,12 @@ export default function SermonHighlighter({
 
   const save = async (color: string) => {
     if (!pill) return;
-    if (!user) { toast.error("Sign in to save highlights"); return; }
-    const { error } = await supabase.from("devotional_highlights" as any).insert({
-      user_id: user.id,
-      sermon_id: sermonId,
-      source_type: "sermon",
-      text: pill.text,
-      section: "sermon",
-      color,
-    });
-    if (error) toast.error("Could not save highlight");
-    else toast.success("Highlight saved");
+    try {
+      await addHighlight({ text: pill.text, section: "sermon", color });
+      toast.success("Highlight saved");
+    } catch {
+      toast.error("Could not save highlight");
+    }
     setPill(null);
     window.getSelection()?.removeAllRanges();
   };

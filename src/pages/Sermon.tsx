@@ -109,6 +109,17 @@ export default function Sermon() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Load a saved sermon when arriving via ?open=<id> (from Library or Search).
+  useEffect(() => {
+    const openId = searchParams.get("open");
+    if (!openId || loading) return;
+    const found = sermons.find((s) => s.id === openId);
+    if (found && (!active || active.id !== openId)) {
+      setActive(found);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [searchParams, sermons, loading, active]);
+
   const generate = async () => {
     if (!topic.trim()) return;
     setLoading(true);
@@ -361,7 +372,7 @@ export default function Sermon() {
           </div>
         </div>
       ) : (
-        <SermonHighlighter sermonId={active.id}>
+        <SermonHighlighter addHighlight={addHighlight}>
         <article className="px-6 pt-4 pb-10 animate-fade-in max-w-2xl mx-auto space-y-8" onClick={handleMarkClick}>
           {/* Persistent action bar */}
           <div className="flex gap-2 -mb-2">

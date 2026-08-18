@@ -94,10 +94,14 @@ const DevotionalReader = ({ devotional, tones, onRegenerate }: DevotionalReaderP
   const handleAddHighlight = async (color?: string) => {
     const selectedText = selectedTextRef.current;
     if (!selectedText) return;
-    await addHighlight({ text: selectedText, section: "content", color: color || highlightColor });
+    try {
+      await addHighlight({ text: selectedText, section: "content", color: color || highlightColor });
+      toast.success("Highlighted ✨");
+    } catch {
+      toast.error("Could not save highlight");
+    }
     setSelectionPos(null);
     window.getSelection()?.removeAllRanges();
-    toast.success("Highlighted ✨");
   };
 
   const lookupWord = async () => {
