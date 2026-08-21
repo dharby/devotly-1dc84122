@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { Home, BookOpen, ScrollText, Bookmark, Search, CalendarDays, NotebookPen, Timer, UtensilsCrossed, Flame, Users, Settings, Cross } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
 
 const sections = [
   {
@@ -43,9 +44,9 @@ const Sidebar = () => {
   return (
     <aside className="hidden md:flex flex-col fixed inset-y-0 left-0 w-64 border-r border-sidebar-border bg-sidebar z-40">
       <div className="h-16 px-5 flex items-center gap-2.5 border-b border-sidebar-border">
-        <div className="w-9 h-9 rounded-xl bg-gradient-cathedral flex items-center justify-center text-primary-foreground shadow-cathedral">
+        <motion.div whileHover={{ rotate: 8, scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }} className="w-9 h-9 rounded-xl bg-gradient-cathedral flex items-center justify-center text-primary-foreground shadow-cathedral">
           <Cross className="h-5 w-5" />
-        </div>
+        </motion.div>
         <span className="font-display text-xl font-bold tracking-tight">Devotly</span>
       </div>
 

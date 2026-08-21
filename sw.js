@@ -28,9 +28,15 @@ function schedule(kind, timeHHmm, content) {
       body: content.body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",
+      image: "/icon-512.png",
+      vibrate: [200, 100, 200],
       tag: `devotly-${kind}`,
       renotify: true,
       requireInteraction: false,
+      actions: [
+        { action: "open", title: "✨ Preview" },
+        { action: "dismiss", title: "Later" },
+      ],
       data: { url: content.url || "/" },
     });
     schedule(kind, timeHHmm, content);
@@ -59,8 +65,14 @@ self.addEventListener("message", (event) => {
       body: data.body,
       icon: "/icon-192.png",
       badge: "/icon-192.png",
+      image: "/icon-512.png",
+      vibrate: [200, 100, 200],
       tag: data.tag || "devotly",
       renotify: true,
+      actions: [
+        { action: "open", title: "✨ Preview" },
+        { action: "dismiss", title: "Later" },
+      ],
       data: { url: data.url || "/" },
     });
   }
@@ -68,6 +80,7 @@ self.addEventListener("message", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
+  if (event.action === "dismiss") return;
   const target = (event.notification.data && event.notification.data.url) || "/";
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
@@ -80,4 +93,8 @@ self.addEventListener("notificationclick", (event) => {
       return self.clients.openWindow(target);
     })
   );
+});
+
+self.addEventListener("notificationclose", () => {
+  // keep for analytics if needed
 });

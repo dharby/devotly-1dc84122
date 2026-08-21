@@ -1,7 +1,13 @@
 {
   "name": "Devotly — Daily Devotionals & Prayer",
   "short_name": "Devotly",
-  "description": "AI-guided devotionals, sermons, prayer timer, and fasting tracker.",
+  "description": "Daily devotionals, sermons, prayer timer, fasting tracker and family devotionals — built for everyday faith.",
+  "categories": ["lifestyle", "religion", "education"],
+  "shortcuts": [
+    { "name": "New Devotional", "url": "/generate", "description": "Create a new devotional" },
+    { "name": "Prayer Timer", "url": "/prayer-timer", "description": "Start a prayer session" },
+    { "name": "Reading Plan", "url": "/reading-plan", "description": "Today's Bible reading" }
+  ],
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { ChevronLeft, Sun, Moon, Monitor, Type, Globe, Bell, LogOut, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -89,9 +90,9 @@ const Settings = () => {
         </div>
       </div>
 
-      <div className="px-6 pt-6 space-y-8 animate-fade-in">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4 }} className="px-6 pt-6 space-y-8">
         {/* Theme */}
-        <section>
+        <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
             <Sun className="h-4 w-4 text-primary" /> Appearance
           </h2>
@@ -112,10 +113,10 @@ const Settings = () => {
               </button>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* Font Family */}
-        <section>
+        <motion.section initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
             <Type className="h-4 w-4 text-primary" /> Font Style
           </h2>
@@ -136,10 +137,10 @@ const Settings = () => {
               </button>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* Font Size */}
-        <section>
+        <motion.section initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
           <h2 className="font-display text-base font-semibold mb-3">Font Size</h2>
           <div className="grid grid-cols-4 gap-2">
             {fontSizes.map((s) => (
@@ -157,10 +158,10 @@ const Settings = () => {
               </button>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* Language */}
-        <section>
+        <motion.section initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
             <Globe className="h-4 w-4 text-primary" /> Language
           </h2>
@@ -184,10 +185,10 @@ const Settings = () => {
               </button>
             ))}
           </div>
-        </section>
+        </motion.section>
 
         {/* Notifications */}
-        <section>
+        <motion.section initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
             <Bell className="h-4 w-4 text-primary" /> Notifications
           </h2>
@@ -221,10 +222,10 @@ const Settings = () => {
               Notifications are delivered to your device notification centre. Add Devotly to your home screen for the most reliable delivery.
             </p>
           </div>
-        </section>
+        </motion.section>
 
         {/* Bible translation */}
-        <section>
+        <motion.section initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
             <BookOpen className="h-4 w-4 text-primary" /> Bible Translation
           </h2>
@@ -258,10 +259,10 @@ const Settings = () => {
               })}
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Account */}
-        <section>
+        <motion.section initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.35 }}>
           <h2 className="font-display text-base font-semibold mb-3 flex items-center gap-2">
             <LogOut className="h-4 w-4 text-primary" /> Account
           </h2>
@@ -278,8 +279,8 @@ const Settings = () => {
               <LogOut className="h-4 w-4 mr-2" /> Sign Out
             </Button>
           </div>
-        </section>
-      </div>
+        </motion.section>
+      </motion.div>
     </div>
   );
 };

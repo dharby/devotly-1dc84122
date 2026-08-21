@@ -6,46 +6,12 @@ import { useSermons } from "@/hooks/useSermons";
 import { useTracker } from "@/hooks/useTracker";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { FloatingOrbs } from "@/components/motion";
 import heroImage from "@/assets/hero-devotional.jpg";
+import { getDailySuggestion } from "@/lib/dailyTopics";
 
-const DAILY_TOPICS = [
-  { topic: "God's Faithfulness", verse: "Lamentations 3:22-23" },
-  { topic: "Peace in Storms", verse: "John 14:27" },
-  { topic: "Strength in Weakness", verse: "2 Corinthians 12:9" },
-  { topic: "Walking in Love", verse: "1 John 4:7-8" },
-  { topic: "Trusting God's Plan", verse: "Jeremiah 29:11" },
-  { topic: "Joy of the Lord", verse: "Nehemiah 8:10" },
-  { topic: "Forgiveness", verse: "Colossians 3:13" },
-  { topic: "Hope in Christ", verse: "Romans 15:13" },
-  { topic: "Patience & Endurance", verse: "James 1:2-4" },
-  { topic: "God's Provision", verse: "Philippians 4:19" },
-  { topic: "Identity in Christ", verse: "2 Corinthians 5:17" },
-  { topic: "Gratitude", verse: "1 Thessalonians 5:18" },
-  { topic: "Courage", verse: "Joshua 1:9" },
-  { topic: "Grace", verse: "Ephesians 2:8-9" },
-  { topic: "Renewed Mind", verse: "Romans 12:2" },
-  { topic: "Humility", verse: "Philippians 2:3-4" },
-  { topic: "Compassion", verse: "Colossians 3:12" },
-  { topic: "Purpose", verse: "Ephesians 2:10" },
-  { topic: "Obedience", verse: "John 14:15" },
-  { topic: "Wisdom", verse: "James 1:5" },
-  { topic: "Rest in God", verse: "Matthew 11:28-30" },
-  { topic: "Overcoming Fear", verse: "2 Timothy 1:7" },
-  { topic: "Generosity", verse: "2 Corinthians 9:7" },
-  { topic: "The Holy Spirit", verse: "John 16:13" },
-  { topic: "Contentment", verse: "Philippians 4:11-12" },
-  { topic: "Worship", verse: "Psalm 95:1-2" },
-  { topic: "Prayer Life", verse: "Philippians 4:6-7" },
-  { topic: "God's Sovereignty", verse: "Isaiah 46:10" },
-  { topic: "Healing", verse: "Psalm 147:3" },
-  { topic: "Perseverance", verse: "Galatians 6:9" },
-  { topic: "Spiritual Armor", verse: "Ephesians 6:11" },
-];
 
-function getDailySuggestion() {
-  const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  return DAILY_TOPICS[dayOfYear % DAILY_TOPICS.length];
-}
 
 interface RecentTopic { topic: string; kind: "devotional" | "sermon"; at: number }
 
@@ -86,49 +52,48 @@ const Index = () => {
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0">
-          <img src={heroImage} alt="Peaceful devotional scene" className="w-full h-full object-cover" />
+          <motion.img initial={{ scale: 1.08 }} animate={{ scale: 1 }} transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }} src={heroImage} alt="Peaceful devotional scene" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background" />
         </div>
-        <div className="relative px-6 pt-14 pb-10">
-          <p className="text-sm font-medium text-muted-foreground mb-1">
+        <FloatingOrbs />
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.15, ease: [0.22, 1, 0.36, 1] }} className="relative px-6 pt-14 pb-10">
+          <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-sm font-medium text-muted-foreground mb-1">
             {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-          </p>
+          </motion.p>
           <h1 className="font-display text-3xl font-bold tracking-tight mb-2">
             Good {getGreeting()}{user?.email ? `, ${user.email.split("@")[0]}` : ""},
           </h1>
           <p className="text-muted-foreground text-base">Begin your day in God's presence.</p>
-        </div>
+        </motion.div>
       </div>
 
       {/* Quick Stats */}
-      <div className="px-6 -mt-2">
+      <motion.div initial="initial" whileInView="animate" viewport={{ once: true }} variants={{ initial: {}, animate: { transition: { staggerChildren: 0.07 } } }} className="px-6 -mt-2">
         <div className="grid grid-cols-2 gap-3 mb-8">
-          <StatCard icon={<Flame className="h-5 w-5 text-primary" />} value={streak} label="Day Streak" />
-          <StatCard icon={<BookOpen className="h-5 w-5 text-primary" />} value={totalDevotionals} label="Devotionals" />
-          <StatCard icon={<ScrollText className="h-5 w-5 text-primary" />} value={savedSermons} label="Sermons" />
-          <StatCard icon={<Calendar className="h-5 w-5 text-primary" />} value={completedDays} label="Days Active" />
+          <StatCard icon={<Flame className="h-5 w-5 text-primary" />} value={streak} label="Day Streak" delay={0} />
+          <StatCard icon={<BookOpen className="h-5 w-5 text-primary" />} value={totalDevotionals} label="Devotionals" delay={0.07} />
+          <StatCard icon={<ScrollText className="h-5 w-5 text-primary" />} value={savedSermons} label="Sermons" delay={0.14} />
+          <StatCard icon={<Calendar className="h-5 w-5 text-primary" />} value={completedDays} label="Days Active" delay={0.21} />
         </div>
-      </div>
+      </motion.div>
 
       {/* Main Action */}
-      <div className="px-6 mb-6">
-        <button
-          onClick={() => navigate("/generate")}
-          className="w-full bg-gradient-golden rounded-2xl p-6 shadow-golden text-primary-foreground text-left transition-transform active:scale-[0.98]"
-        >
-          <div className="flex items-start justify-between">
+      <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} className="px-6 mb-6">
+        <motion.button whileHover={{ scale: 1.015, y: -2 }} whileTap={{ scale: 0.985 }} onClick={() => navigate("/generate")} className="w-full bg-gradient-golden rounded-2xl p-6 shadow-golden text-primary-foreground text-left relative overflow-hidden group">
+          <motion.div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12" initial={{ x: "-120%" }} whileHover={{ x: "120%" }} transition={{ duration: 0.9 }} />
+          <div className="flex items-start justify-between relative">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="h-5 w-5" />
+                <motion.span animate={{ rotate: [0, 14, -10, 0] }} transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 4 }}><Sparkles className="h-5 w-5" /></motion.span>
                 <span className="text-sm font-semibold uppercase tracking-wider opacity-90">Today's Devotional</span>
               </div>
               <h2 className="font-display text-xl font-bold mb-1">Generate a New Devotion</h2>
-              <p className="text-sm opacity-80">Enter any topic and receive a Spirit-led devotional</p>
+              <p className="text-sm opacity-80">Reflect on any topic — crafted for your journey</p>
             </div>
-            <ArrowRight className="h-6 w-6 mt-1 flex-shrink-0" />
+            <motion.span whileHover={{ x: 4 }} transition={{ type: "spring", stiffness: 400 }}><ArrowRight className="h-6 w-6 mt-1 flex-shrink-0" /></motion.span>
           </div>
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
       {/* Quick Actions */}
       <div className="px-6 mb-6">
@@ -269,13 +234,13 @@ const Index = () => {
   );
 };
 
-function StatCard({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) {
+function StatCard({ icon, value, label, delay = 0 }: { icon: React.ReactNode; value: number; label: string; delay?: number }) {
   return (
-    <div className="bg-card rounded-xl p-3 border border-border text-center">
+    <motion.div variants={{ initial: { opacity: 0, y: 14, scale: 0.98 }, animate: { opacity: 1, y: 0, scale: 1 } }} transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }} whileHover={{ y: -2 }} className="bg-card rounded-xl p-3 border border-border text-center">
       <div className="flex justify-center mb-1">{icon}</div>
-      <p className="font-display text-xl font-bold">{value}</p>
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: delay + 0.25 }} className="font-display text-xl font-bold">{value}</motion.p>
       <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">{label}</p>
-    </div>
+    </motion.div>
   );
 }
 

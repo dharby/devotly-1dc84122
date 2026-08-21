@@ -10,23 +10,23 @@ export interface ReminderContent { title: string; body: string; url: string }
 
 export const REMINDER_CONTENT: Record<ReminderKind, ReminderContent> = {
   devotion: {
-    title: "Devotly · Time for your devotional 🌿",
-    body: "Take a quiet moment with God today.",
+    title: "Devotly · Your quiet moment awaits 🌿✨",
+    body: "Come, rest in His presence — today’s devotional is ready for you.",
     url: "/generate",
   },
   word: {
-    title: "Devotly · Word of the Day ✨",
-    body: "A fresh word to carry through your day. Tap to receive it.",
-    url: "/",
+    title: "Devotly · Word of the Day ✨ — tap to reveal",
+    body: "A fresh, Spirit-breathed word to carry through your day.",
+    url: "/?preview=word",
   },
   scripture: {
-    title: "Devotly · Scripture of the Day 📖",
-    body: "Today's verse is waiting for you. Tap to read and reflect.",
-    url: "/",
+    title: "Devotly · Scripture of the Day 📖 — tap to behold",
+    body: "A living verse is waiting — open to read, reflect, and be renewed.",
+    url: "/?preview=scripture",
   },
   reading: {
-    title: "Devotly · Bible in a Year 📚",
-    body: "Today's chapters are ready.",
+    title: "Devotly · Bible in a Year 📚 — Day’s journey ready",
+    body: "Your chapters for today are ready — continue the story.",
     url: "/reading-plan",
   },
 };
@@ -72,6 +72,29 @@ async function postToWorker(message: Record<string, unknown>) {
 
 export async function showNotification(title: string, body: string, url = "/", tag = "devotly") {
   if (!notificationsSupported() || Notification.permission !== "granted") return;
+  // Save to in-app inbox for preview + My Library
+  try {
+    const { addToInbox } = await import("./notificationInbox");
+    const kind: ReminderKind = tag.includes("word") ? "word" : tag.includes("scripture") ? "scripture" : tag.includes("reading") ? "reading" : "devotion";
+    addToInbox({ kind, title, body, url });
+    // also persist word/scripture of the day to library via localStorage for My Library tabs
+    if (kind === "word" || kind === "scripture") {
+      const daily = await getDailyContent().catch(() => null);
+      if (daily) {
+        try {
+          const key = kind === "word" ? "devotly_library_words" : "devotly_library_daily_scriptures";
+          const raw = localStorage.getItem(key);
+          const arr = raw ? JSON.parse(raw) : [];
+          const entry = kind === "word" ? { id: Date.now().toString(), ...daily.word, date: daily.date } : { id: Date.now().toString(), ...daily.scripture, date: daily.date };
+          // dedupe by date
+          if (!arr.find((x: { date?: string }) => x.date === daily.date)) {
+            arr.unshift(entry);
+            localStorage.setItem(key, JSON.stringify(arr.slice(0, 50)));
+          }
+        } catch {}
+      }
+    }
+  } catch {}
   const reg = await registerNotificationWorker();
   if (reg) {
     await reg.showNotification(title, {
@@ -79,6 +102,14 @@ export async function showNotification(title: string, body: string, url = "/", t
       icon: "/icon-192.png",
       badge: "/icon-192.png",
       tag,
+      renotify: true,
+      requireInteraction: false,
+      vibrate: [200, 100, 200],
+      image: "/icon-512.png",
+      actions: [
+        { action: "open", title: "✨ Preview" },
+        { action: "dismiss", title: "Later" },
+      ],
       data: { url },
     });
     return;

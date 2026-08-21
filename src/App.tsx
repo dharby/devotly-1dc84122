@@ -6,8 +6,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Sidebar from "@/components/Sidebar";
 import BottomNav from "@/components/BottomNav";
+import InstallPrompt from "@/components/InstallPrompt";
+import InAppNotificationCenter from "@/components/InAppNotificationCenter";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import GenerateDevotional from "./pages/GenerateDevotional";
 import Tracker from "./pages/Tracker";
@@ -54,27 +57,38 @@ const AppShell = () => {
   return (
     <>
       <ScrollToTop />
+      <InstallPrompt />
+      <InAppNotificationCenter />
       <div className={cn("min-h-screen", showNav && "md:pl-64")}>
         {showNav && <Sidebar />}
-        <div key={location.pathname} className="animate-fade-in min-h-screen">
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-            <Route path="/generate" element={<ProtectedRoute><GenerateDevotional /></ProtectedRoute>} />
-            <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
-            <Route path="/saved" element={<ProtectedRoute><SavedDevotionals /></ProtectedRoute>} />
-            <Route path="/family" element={<ProtectedRoute><Family /></ProtectedRoute>} />
-            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-            <Route path="/prayer-timer" element={<ProtectedRoute><PrayerTimer /></ProtectedRoute>} />
-            <Route path="/fasting" element={<ProtectedRoute><FastingTracker /></ProtectedRoute>} />
-            <Route path="/sermon" element={<ProtectedRoute><Sermon /></ProtectedRoute>} />
-            <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
-            <Route path="/scripture" element={<ProtectedRoute><ScriptureSearch /></ProtectedRoute>} />
-            <Route path="/reading-plan" element={<ProtectedRoute><ReadingPlan /></ProtectedRoute>} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="min-h-screen"
+          >
+            <Routes location={location}>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/generate" element={<ProtectedRoute><GenerateDevotional /></ProtectedRoute>} />
+              <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
+              <Route path="/saved" element={<ProtectedRoute><SavedDevotionals /></ProtectedRoute>} />
+              <Route path="/family" element={<ProtectedRoute><Family /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/prayer-timer" element={<ProtectedRoute><PrayerTimer /></ProtectedRoute>} />
+              <Route path="/fasting" element={<ProtectedRoute><FastingTracker /></ProtectedRoute>} />
+              <Route path="/sermon" element={<ProtectedRoute><Sermon /></ProtectedRoute>} />
+              <Route path="/notes" element={<ProtectedRoute><Notes /></ProtectedRoute>} />
+              <Route path="/scripture" element={<ProtectedRoute><ScriptureSearch /></ProtectedRoute>} />
+              <Route path="/reading-plan" element={<ProtectedRoute><ReadingPlan /></ProtectedRoute>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
         {showNav && (
           <div className="md:hidden">
             <BottomNav />

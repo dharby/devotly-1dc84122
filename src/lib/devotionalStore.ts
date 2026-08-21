@@ -89,7 +89,7 @@ export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// Sample devotional generator (will be replaced by AI)
+// Local sample devotional generator — offline fallback when service is unavailable
 export function generateSampleDevotional(
   topic: string,
   tone: Devotional["tone"]

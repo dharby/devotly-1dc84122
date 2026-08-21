@@ -1,6 +1,7 @@
 import { Home, BookOpen, Search, NotebookPen, Settings } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
@@ -20,19 +21,11 @@ const BottomNav = () => {
         {navItems.map(({ icon: Icon, label, path }) => {
           const isActive = location.pathname === path;
           return (
-            <button
-              key={path}
-              onClick={() => navigate(path)}
-              className={cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[56px]",
-                isActive
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
+            <motion.button key={path} whileTap={{ scale: 0.88 }} whileHover={{ y: -1 }} onClick={() => navigate(path)} className={cn("flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors min-w-[56px] relative", isActive ? "text-primary" : "text-muted-foreground hover:text-foreground")}>
+              {isActive && <motion.span layoutId="bottom-indicator" className="absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-1 rounded-full bg-primary" />}
               <Icon className={cn("h-5 w-5", isActive && "stroke-[2.5]")} />
               <span className="text-[10px] font-medium">{label}</span>
-            </button>
+            </motion.button>
           );
         })}
       </div>

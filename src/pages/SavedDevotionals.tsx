@@ -10,12 +10,14 @@ import EmptyState from "@/components/EmptyState";
 import ConfirmDelete from "@/components/ConfirmDelete";
 import { toast } from "sonner";
 
-type Tab = "devotionals" | "sermons" | "scriptures";
+type Tab = "devotionals" | "sermons" | "scriptures" | "words" | "daily";
 
 const TABS: { value: Tab; label: string }[] = [
   { value: "devotionals", label: "Devotionals" },
   { value: "sermons", label: "Sermons" },
   { value: "scriptures", label: "Scriptures" },
+  { value: "words", label: "Word of the Day" },
+  { value: "daily", label: "Scripture of the Day" },
 ];
 
 const SavedDevotionals = () => {
@@ -24,7 +26,10 @@ const SavedDevotionals = () => {
   const { sermons, updateSermon, deleteSermon } = useSermons();
   const { scriptures, deleteScripture } = useSavedScriptures();
 
-  const [tab, setTab] = useState<Tab>("devotionals");
+  const [tab, setTab] = useState<Tab>(() => {
+    const p = new URLSearchParams(window.location.search).get("tab") as Tab | null;
+    return p && ["devotionals", "sermons", "scriptures", "words", "daily"].includes(p) ? p : "devotionals";
+  });
   const [query, setQuery] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [savedOnly, setSavedOnly] = useState(false);
@@ -54,10 +59,28 @@ const SavedDevotionals = () => {
     [scriptures, q, match],
   );
 
+  const words = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("devotly_library_words");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr.filter((w: { word?: string; meaning?: string; reference?: string }) => match(w.word, w.meaning, w.reference, w.verse)) : [];
+    } catch { return []; }
+  }, [q]);
+
+  const daily = useMemo(() => {
+    try {
+      const raw = localStorage.getItem("devotly_library_daily_scriptures");
+      const arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr.filter((s: { reference?: string; text?: string }) => match(s.reference, s.text)) : [];
+    } catch { return []; }
+  }, [q]);
+
   const counts: Record<Tab, number> = {
     devotionals: devs.length,
-    serms: serms.length,
+    sermons: serms.length,
     scriptures: scrs.length,
+    words: words.length,
+    daily: daily.length,
   };
 
   const toggleSave = async (id: string) => {
@@ -253,6 +276,46 @@ const SavedDevotionals = () => {
                     </button>
                   )}
                 />
+              </div>
+            ))
+          )
+        )}
+
+        {tab === "words" && (
+          words.length === 0 ? (
+            <EmptyState icon={<Quote className="h-7 w-7" />} title="No Word of the Day yet" description="When you tap a Word of the Day notification, it’s saved here for preview." />
+          ) : (
+            words.map((w: { id: string; word: string; original?: string; transliteration?: string; meaning: string; reference: string; verse: string; application?: string; date: string }) => (
+              <div key={w.id} className="bg-card rounded-xl border border-border mb-3 p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] uppercase tracking-widest text-primary font-semibold">Word of the Day</span>
+                  <span className="text-[10px] text-muted-foreground">{w.date}</span>
+                </div>
+                <p className="font-display font-bold text-base">{w.word} {w.original && <span className="text-sm font-normal text-muted-foreground">· {w.original} ({w.transliteration})</span>}</p>
+                <p className="text-sm text-muted-foreground mt-1">{w.meaning}</p>
+                <div className="bg-muted rounded-lg p-3 mt-3">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">{w.reference}</p>
+                  <p className="text-sm italic">“{w.verse}”</p>
+                </div>
+                {w.application && <p className="text-xs text-muted-foreground mt-2">{w.application}</p>}
+              </div>
+            ))
+          )
+        )}
+
+        {tab === "daily" && (
+          daily.length === 0 ? (
+            <EmptyState icon={<BookOpen className="h-7 w-7" />} title="No Scripture of the Day yet" description="Tap a Scripture of the Day notification to save it here and preview anytime." />
+          ) : (
+            daily.map((s: { id: string; reference: string; text: string; reflection?: string; date: string }) => (
+              <div key={s.id} className="bg-card rounded-xl border border-border mb-3 p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] uppercase tracking-widest text-primary font-semibold">Scripture of the Day</span>
+                  <span className="text-[10px] text-muted-foreground">{s.date}</span>
+                </div>
+                <p className="font-display font-semibold text-sm">{s.reference}</p>
+                <p className="text-sm italic border-l-2 border-primary/40 pl-3 my-2">“{s.text}”</p>
+                {s.reflection && <p className="text-xs text-muted-foreground">{s.reflection}</p>}
               </div>
             ))
           )
