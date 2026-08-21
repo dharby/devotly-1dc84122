@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import GenerateDevotional from "./pages/GenerateDevotional";
 import Tracker from "./pages/Tracker";
 import SavedDevotionals from "./pages/SavedDevotionals";
@@ -42,6 +43,13 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const LandingOrHome = () => {
+  const { user, loading } = useAuth();
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><p className="text-muted-foreground animate-pulse">Loading...</p></div>;
+  if (user) return <Index />;
+  return <Landing />;
+};
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -52,7 +60,9 @@ const ScrollToTop = () => {
 
 const AppShell = () => {
   const location = useLocation();
-  const showNav = !["/auth", "/reset-password"].includes(location.pathname);
+  const { user } = useAuth();
+  const isLandingUnauth = location.pathname === "/" && !user;
+  const showNav = !["/auth", "/reset-password"].includes(location.pathname) && !isLandingUnauth;
 
   return (
     <>
@@ -73,7 +83,8 @@ const AppShell = () => {
             <Routes location={location}>
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/" element={<LandingOrHome />} />
+              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/generate" element={<ProtectedRoute><GenerateDevotional /></ProtectedRoute>} />
               <Route path="/tracker" element={<ProtectedRoute><Tracker /></ProtectedRoute>} />
               <Route path="/saved" element={<ProtectedRoute><SavedDevotionals /></ProtectedRoute>} />
