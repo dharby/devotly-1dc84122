@@ -68,7 +68,7 @@ const AppShell = () => {
     <>
       <ScrollToTop />
       <InstallPrompt />
-      <InAppNotificationCenter />
+      {user && <InAppNotificationCenter />}
       <div className={cn("min-h-screen", showNav && "md:pl-64")}>
         {showNav && <Sidebar />}
         <AnimatePresence mode="wait">

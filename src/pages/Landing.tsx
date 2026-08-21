@@ -6,12 +6,12 @@ import { useState, useRef } from "react";
 import heroImage from "@/assets/hero-devotional.jpg";
 
 const features = [
-  { icon: BookOpen, title: "Daily Devotionals", desc: "Thoughtfully crafted devotionals for every topic — personal, family, encouraging & deep.", color: "bg-primary" },
-  { icon: ScrollText, title: "Sermons & Bible Study", desc: "Full sermons on any passage — outline, exegesis, illustrations & application.", color: "bg-warm" },
-  { icon: Search, title: "Scripture Search", desc: "Find any verse by theme, phrase or question — with context & cross-refs.", color: "bg-sage" },
-  { icon: Timer, title: "Prayer Timer", desc: "Stay focused in prayer with gentle intervals and history.", color: "bg-primary" },
-  { icon: Flame, title: "Tracker & Streaks", desc: "Build a habit — see streaks, calendar & progress.", color: "bg-warm" },
-  { icon: Users, title: "Family Sharing", desc: "Share devotionals with family, discuss & grow together.", color: "bg-sage" },
+  { icon: BookOpen, title: "Daily Devotionals", desc: "Curated reflections written with depth — not generated, but crafted for real life's moments." },
+  { icon: ScrollText, title: "Sermons & Bible Study", desc: "Full sermons with outlines, exegesis and illustrations — rich context without the noise." },
+  { icon: Search, title: "Scripture Search", desc: "Find verses by theme, phrase or question with cross-references — search that informs, not overwhelms." },
+  { icon: Timer, title: "Prayer Timer", desc: "Gentle intervals to help you stay focused in prayer, with a history you can revisit." },
+  { icon: Flame, title: "Tracker & Streaks", desc: "A subtle way to build a habit — see your progress without the gamified pressure." },
+  { icon: Users, title: "Family Sharing", desc: "Share devotionals with family, discuss together and grow — private, by design." },
 ];
 
 const testimonials = [
@@ -101,7 +101,7 @@ export default function Landing() {
                 <span className="text-gradient-cathedral">every single day.</span>
               </h1>
               <p className="text-lg text-muted-foreground mt-5 max-w-xl leading-relaxed">
-                Devotly crafts beautiful devotionals, sermons, prayer & scripture for real life — with motion, depth and care. Install in 2 seconds, use offline, grow daily.
+                Devotly transforms your daily spiritual practice with beautifully crafted devotionals, sermons and scripture — thoughtfully designed with motion, depth and care. Add to your home screen and experience it offline, instantly.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 mt-8">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
@@ -190,10 +190,10 @@ export default function Landing() {
         <div className="mx-auto max-w-6xl px-4 md:px-6 py-16 md:py-20">
           <div className="grid md:grid-cols-3 gap-8 relative">
             <div className="hidden md:block absolute top-8 left-[16%] right-[16%] h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-            {[
-              { n: "1", t: "Install in 2 seconds", d: "Tap ‘Install’ — no store, works offline, feels native." },
-              { n: "2", t: "Choose your rhythm", d: "Set Word & Scripture at your perfect time — delivered to your notification centre." },
-              { n: "3", t: "Preview & keep", d: "Tap notification → preview instantly, saved to My Library for later." },
+{[
+              { n: "1", t: "Download to home screen", d: "Add Devotly to your home screen — works offline, no store needed." },
+              { n: "2", t: "Choose your rhythm", d: "Set Word & Scripture at your perfect time — delivered beautifully each day." },
+              { n: "3", t: "Preview & keep", d: "Tap to preview instantly, saved to My Library for later." },
             ].map((s, i) => (
               <motion.div key={s.n} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center relative">
                 <div className="mx-auto w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold shadow-cathedral">{s.n}</div>
@@ -231,8 +231,8 @@ export default function Landing() {
           <div className="rounded-[2rem] bg-card p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
             <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-primary/10 blur-2xl" />
             <div>
-              <h3 className="font-display text-2xl md:text-3xl font-bold">Ready for a quieter, deeper day?</h3>
-              <p className="text-muted-foreground mt-2">Join thousands — free, offline, private. Install and feel it in 30 seconds.</p>
+              <h3 className="font-display text-2xl md:text-3xl font-bold">A simpler way to engage with scripture daily</h3>
+              <p className="text-muted-foreground mt-2">Join thousands who've added Devotly to their home screen. Free, offline, private — no store required.</p>
             </div>
             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               <Button size="lg" onClick={() => navigate("/auth")} className="rounded-full h-12 px-8 shadow-cathedral">Get started free <ArrowRight className="h-4 w-4 ml-2" /></Button>

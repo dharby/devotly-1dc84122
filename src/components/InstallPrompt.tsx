@@ -81,7 +81,7 @@ export default function InstallPrompt() {
 
   const dismiss = () => {
     setVisible(false);
-    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch {}
+    try { localStorage.setItem(DISMISS_KEY, String(Date.now())); } catch (e) {/* ignored */}
   };
 
   const handleInstall = async () => {
@@ -129,7 +129,7 @@ export default function InstallPrompt() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="font-display text-sm font-bold leading-tight">
-                        {isIOSDevice && !deferredPrompt ? "Add Devotly to Home Screen" : "Install Devotly"}
+                        Download as web app directly to device homes screen
                       </h3>
                       <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
                         Free · Offline ready
@@ -137,18 +137,14 @@ export default function InstallPrompt() {
                     </div>
                     {!collapsed && (
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                        {isIOSDevice && !deferredPrompt ? (
-                          <>Tap <Share className="inline h-3 w-3 mx-0.5" /> <span className="font-medium text-foreground">Share</span> then <span className="font-medium text-foreground">“Add to Home Screen”</span> for instant access, offline devotionals & daily reminders.</>
-                        ) : (
-                          <>Get the full app experience — faster, offline access, daily reminders & home-screen presence. No store needed.</>
-                        )}
+                        <>Install Devotly once and it will appear on your home screen. Offline ready, daily devotionals, no store required.</>
                       </p>
                     )}
                     {collapsed && <p className="text-xs text-muted-foreground mt-1">Tap to expand details</p>}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
                       <Button onClick={handleInstall} disabled={installing} size="sm" className="h-8 rounded-full px-4 text-xs font-semibold shadow-cathedral">
                         <Download className="h-3.5 w-3.5 mr-1.5" />
-                        {installing ? "Installing…" : isIOSDevice && !deferredPrompt ? "How to install" : "Install now"}
+                        {installing ? "Installing…" : "Download as web app directly to device homes screen"}
                       </Button>
                       <Button onClick={dismiss} variant="ghost" size="sm" className="h-8 rounded-full px-3 text-xs">Not now</Button>
                       <span className="text-[11px] text-muted-foreground/70 hidden sm:inline">Shows again in 24 hours</span>
