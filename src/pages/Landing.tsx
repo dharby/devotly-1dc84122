@@ -32,8 +32,9 @@ export default function Landing() {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll();
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -60]);
+  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -80]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
 
   return (
     <div ref={ref} className="min-h-screen bg-background overflow-clip">
@@ -76,7 +77,7 @@ export default function Landing() {
       {/* HERO */}
       <section className="relative overflow-hidden">
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="absolute inset-0">
-          <img src={heroImage} alt="" className="w-full h-[92%] object-cover" />
+          <img src={heroImage} alt="" className="w-full h-[92%] object-cover transition-transform duration-700 ease-out-hero" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/70 to-background" />
           <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-warm/10" />
         </motion.div>
@@ -95,14 +96,24 @@ export default function Landing() {
                 Trusted by thousands walking daily with God
                 <Sparkles className="h-3 w-3 text-primary" />
               </motion.div>
-              <h1 className="font-display text-4xl md:text-6xl font-bold tracking-tight mt-6 leading-[0.95]">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                className="font-display text-4xl md:text-6xl font-bold tracking-tight mt-6 leading-[0.95]"
+              >
                 A quiet moment,
                 <br />
                 <span className="text-gradient-cathedral">every single day.</span>
-              </h1>
-              <p className="text-lg text-muted-foreground mt-5 max-w-xl leading-relaxed">
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+                className="text-lg text-muted-foreground mt-5 max-w-xl leading-relaxed"
+              >
                 Devotly transforms your daily spiritual practice with beautifully crafted devotionals, sermons and scripture — thoughtfully designed with motion, depth and care. Add to your home screen and experience it offline, instantly.
-              </p>
+              </motion.p>
               <div className="flex flex-col sm:flex-row gap-3 mt-8">
                 <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                   <Button size="lg" onClick={() => navigate("/auth")} className="rounded-full h-12 px-8 shadow-cathedral text-base">
