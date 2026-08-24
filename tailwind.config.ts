@@ -102,6 +102,10 @@ export default {
           from: { opacity: "0", transform: "translateY(-16px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        "caret-blink": {
+          "0%, 70%, 100%": { opacity: "1" },
+          "20%, 50%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -111,6 +115,7 @@ export default {
         float: "float 6s ease-in-out infinite",
         shimmer: "shimmer 2.2s linear infinite",
         "slide-down": "slide-down 0.35s cubic-bezier(0.22,1,0.36,1)",
+        "caret-blink": "caret-blink 1.1s ease-out infinite",
       },
     },
   },

@@ -2,7 +2,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Sparkles, BookOpen, Timer, ScrollText, Users, Flame, Search, NotebookPen, Star, Check, Play, ChevronDown, Quote, Shield, Zap, Heart, Cross, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import heroImage from "@/assets/hero-devotional.jpg";
 
 const features = [
@@ -26,6 +26,48 @@ const faqs = [
   { q: "Will I get notifications?", a: "Opt-in for Word & Scripture of the Day at your chosen time — beautifully crafted, delivered to your device." },
 ];
 
+const HERO_LINE_1 = "A quiet moment,";
+const HERO_LINE_2 = "every single day.";
+
+function useTypewriter(totalChars: number, { speed = 55, startDelay = 600 } = {}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      setCount(totalChars);
+      return;
+    }
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        setCount((c) => {
+          if (c >= totalChars) {
+            clearInterval(interval);
+            return c;
+          }
+          return c + 1;
+        });
+      }, speed);
+    }, startDelay);
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    };
+  }, [totalChars, speed, startDelay]);
+
+  return count;
+}
+
+function Caret() {
+  return (
+    <span
+      aria-hidden="true"
+      className="inline-block w-[3px] md:w-1 h-[0.82em] translate-y-[0.08em] bg-current rounded-full animate-caret-blink ml-[0.06em]"
+    />
+  );
+}
+
 export default function Landing() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -35,6 +77,10 @@ export default function Landing() {
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -80]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.25], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
+
+  const heroTotal = HERO_LINE_1.length + HERO_LINE_2.length;
+  const typedCount = useTypewriter(heroTotal);
+  const typedDone = typedCount >= heroTotal;
 
   return (
     <div ref={ref} className="min-h-screen bg-background overflow-clip">
@@ -100,11 +146,23 @@ export default function Landing() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="font-display text-4xl md:text-6xl font-bold tracking-tight mt-6 leading-[0.95]"
+                className="relative font-display text-4xl md:text-6xl font-bold tracking-tight mt-6 leading-[0.95]"
               >
-                A quiet moment,
-                <br />
-                <span className="text-gradient-cathedral">every single day.</span>
+                <span className="sr-only">{`${HERO_LINE_1} ${HERO_LINE_2}`}</span>
+                <span className="invisible" aria-hidden="true">
+                  {HERO_LINE_1}
+                  <br />
+                  {HERO_LINE_2}
+                </span>
+                <span className="absolute inset-0" aria-hidden="true">
+                  {HERO_LINE_1.slice(0, Math.min(typedCount, HERO_LINE_1.length))}
+                  {typedCount <= HERO_LINE_1.length && !typedDone && <Caret />}
+                  <br />
+                  <span className="text-gradient-cathedral">
+                    {HERO_LINE_2.slice(0, Math.max(0, typedCount - HERO_LINE_1.length))}
+                  </span>
+                  {typedCount > HERO_LINE_1.length && !typedDone && <Caret />}
+                </span>
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 20 }}

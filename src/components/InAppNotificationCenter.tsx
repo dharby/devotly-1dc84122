@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bell, X, BookOpen, Sparkles, ScrollText, Eye, Trash2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getInbox, markRead, markAllRead, clearInbox, type InboxItem } from "@/lib/notificationInbox";
+import { mergeOutboxIntoInbox } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { getDailyContent } from "@/lib/dailyContent";
 
@@ -18,6 +19,9 @@ export default function InAppNotificationCenter() {
     const on = () => refresh();
     window.addEventListener("devotly:inbox", on);
     window.addEventListener("storage", on);
+    // Pull in anything delivered by the service worker while we were closed
+    // (e.g. Word/Scripture of the Day fired in the background).
+    mergeOutboxIntoInbox().then((n) => { if (n > 0) refresh(); });
     // handle ?preview=word|scripture from notification click
     const params = new URLSearchParams(location.search);
     const preview = params.get("preview");
@@ -89,7 +93,7 @@ export default function InAppNotificationCenter() {
   return (
     <>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => { setOpen((v) => !v); mergeOutboxIntoInbox().then((n) => { if (n > 0) refresh(); }); }}
         className="fixed top-3 right-3 z-[90] w-10 h-10 rounded-full bg-card border border-border shadow-warm flex items-center justify-center hover:shadow-golden transition-shadow md:top-4 md:right-4"
         aria-label="Notifications"
       >
