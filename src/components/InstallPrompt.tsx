@@ -62,15 +62,9 @@ export default function InstallPrompt() {
 
     const fallbackTimer = setTimeout(() => {
       if (!isStandalone() && !wasRecentlyDismissed()) {
-        const visits = Number(localStorage.getItem("devotly_visits") || "0") + 1;
-        localStorage.setItem("devotly_visits", String(visits));
-        // Show for every visitor now (24h recurrence handles repeat), first visit after 2.5s
-        if (visits >= 1) setVisible(true);
+        setVisible(true);
       }
     }, 2500);
-
-    const v = Number(localStorage.getItem("devotly_visits") || "0");
-    if (v === 0) localStorage.setItem("devotly_visits", "1");
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
@@ -94,9 +88,13 @@ export default function InstallPrompt() {
         else dismiss();
       } catch { dismiss(); } finally { setInstalling(false); setDeferredPrompt(null); }
     } else if (isIOSDevice) {
-      setCollapsed(false);
+      setCollapsed(true);
+    } else if (navigator.share) {
+      try {
+        await navigator.share({ title: "Devotly", text: "Install Devotly — daily devotionals, prayer & scripture, offline.", url: window.location.href });
+      } catch { /* user cancelled */ }
     } else {
-      dismiss();
+      setCollapsed(true);
     }
   };
 
@@ -129,7 +127,7 @@ export default function InstallPrompt() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="font-display text-sm font-bold leading-tight">
-                        Download as web app directly to device homes screen
+                        Add Devotly to your Home Screen
                       </h3>
                       <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">
                         Free · Offline ready
@@ -140,11 +138,33 @@ export default function InstallPrompt() {
                         <>Install Devotly once and it will appear on your home screen. Offline ready, daily devotionals, no store required.</>
                       </p>
                     )}
-                    {collapsed && <p className="text-xs text-muted-foreground mt-1">Tap to expand details</p>}
+                    {collapsed && (
+                      <div className="mt-2 space-y-2">
+                        {isIOSDevice ? (
+                          <div className="text-xs text-muted-foreground leading-relaxed space-y-1.5">
+                            <p className="font-semibold text-foreground">To install on iOS:</p>
+                            <ol className="list-decimal list-inside space-y-1">
+                              <li>Tap the <strong>Share</strong> button (box with arrow) in Safari's toolbar</li>
+                              <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+                              <li>Tap <strong>"Add"</strong> in the top right</li>
+                            </ol>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-muted-foreground leading-relaxed space-y-1.5">
+                            <p className="font-semibold text-foreground">To install on this device:</p>
+                            <ol className="list-decimal list-inside space-y-1">
+                              <li>Tap your browser's <strong>menu</strong> (three dots or share icon)</li>
+                              <li>Select <strong>"Add to Home Screen"</strong> or <strong>"Install App"</strong></li>
+                              <li>Confirm by tapping <strong>"Add"</strong> or <strong>"Install"</strong></li>
+                            </ol>
+                          </div>
+                        )}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
                       <Button onClick={handleInstall} disabled={installing} size="sm" className="h-8 rounded-full px-4 text-xs font-semibold shadow-cathedral">
                         <Download className="h-3.5 w-3.5 mr-1.5" />
-                        {installing ? "Installing…" : "Download as web app directly to device homes screen"}
+                        {installing ? "Installing…" : deferredPrompt ? "Install App" : isIOSDevice ? "How to Install" : "Install App"}
                       </Button>
                       <Button onClick={dismiss} variant="ghost" size="sm" className="h-8 rounded-full px-3 text-xs">Not now</Button>
                       <span className="text-[11px] text-muted-foreground/70 hidden sm:inline">Shows again in 24 hours</span>
