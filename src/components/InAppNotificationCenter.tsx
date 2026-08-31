@@ -94,7 +94,8 @@ export default function InAppNotificationCenter() {
     <>
       <button
         onClick={() => { setOpen((v) => !v); mergeOutboxIntoInbox().then((n) => { if (n > 0) refresh(); }); }}
-        className="fixed top-3 right-3 z-[90] w-10 h-10 rounded-full bg-card border border-border shadow-warm flex items-center justify-center hover:shadow-golden transition-shadow md:top-4 md:right-4"
+        className="fixed right-3 z-[90] w-10 h-10 rounded-full bg-card border border-border shadow-warm flex items-center justify-center hover:shadow-golden transition-shadow md:right-4"
+        style={{ top: "calc(env(safe-area-inset-top) + 12px)" }}
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5 text-foreground" />
@@ -113,7 +114,8 @@ export default function InAppNotificationCenter() {
 
       <AnimatePresence>
         {open && (
-          <motion.div data-inbox initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -12, scale: 0.98 }} transition={{ type: "spring", damping: 22, stiffness: 260 }} className="fixed top-14 right-3 z-[86] w-[min(92vw,360px)] max-h-[70vh] overflow-hidden rounded-2xl border border-border bg-card shadow-[0_16px_48px_rgba(0,0,0,0.18)] flex flex-col">
+          <motion.div data-inbox initial={{ opacity: 0, y: -12, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -12, scale: 0.98 }} transition={{ type: "spring", damping: 22, stiffness: 260 }} className="fixed right-3 z-[86] w-[min(92vw,360px)] max-h-[70vh] overflow-hidden rounded-2xl border border-border bg-card shadow-[0_16px_48px_rgba(0,0,0,0.18)] flex flex-col"
+            style={{ top: "calc(env(safe-area-inset-top) + 56px)" }}>
             <div className="px-4 py-3 border-b border-border flex items-center justify-between">
               <h3 className="font-display font-semibold text-sm">Notifications</h3>
               <div className="flex items-center gap-1">

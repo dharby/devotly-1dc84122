@@ -108,7 +108,8 @@ export default function InstallPrompt() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -120, opacity: 0 }}
           transition={{ type: "spring", damping: 24, stiffness: 260 }}
-          className="fixed top-0 inset-x-0 z-[100] px-3 pt-3 md:px-6 pointer-events-none"
+          className="fixed top-0 inset-x-0 z-[100] px-3 pointer-events-none"
+          style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}
         >
           <div className="mx-auto max-w-2xl pointer-events-auto">
             <motion.div layout className="relative overflow-hidden rounded-2xl border border-primary/20 bg-card/95 backdrop-blur-xl shadow-[0_12px_40px_-12px_rgba(0,0,0,0.25)]">
