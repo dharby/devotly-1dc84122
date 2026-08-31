@@ -11,8 +11,8 @@ serve(async (req) => {
   try {
     const { topic, tone, translation = "ESV", compareTranslations = [] } = await req.json();
     const extras: string[] = Array.isArray(compareTranslations) ? compareTranslations.filter((t: unknown) => typeof t === "string" && t !== translation) : [];
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
+    if (!GOOGLE_API_KEY) throw new Error("GOOGLE_API_KEY is not configured");
 
     const systemPrompt = `You are a deeply spiritual, Bible-grounded devotional writer. You create extensive, rich devotionals that touch hearts and minds. Your writing is warm, relatable, and deeply insightful.
 
@@ -43,14 +43,14 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.`;
 
     const userPrompt = `Generate an extensive devotional on the topic of "${topic}" with a "${tone}" tone, using the ${translation} Bible translation${extras.length ? ` and also providing the main verse in: ${extras.join(", ")}` : ""}. Make it deeply insightful with multiple scripture references, relatable stories, Greek/Latin word analysis, and practical life application.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${GOOGLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gemini-3.6-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },

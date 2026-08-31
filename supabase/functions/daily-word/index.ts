@@ -17,8 +17,8 @@ serve(async (req) => {
       ? body.translation
       : "ESV";
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
+    if (!GOOGLE_API_KEY) throw new Error("GOOGLE_API_KEY not configured");
 
     const prompt = `Today's date is ${date}. Produce the Word of the Day and the Scripture of the Day for a Christian devotional app.
 
@@ -31,11 +31,11 @@ Rules:
 Return ONLY valid JSON, no markdown fences, in exactly this shape:
 {"word":{"word":"","original":"","transliteration":"","meaning":"","reference":"","verse":"","application":""},"scripture":{"reference":"","text":"","translation":"${translation}","reflection":""}}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${GOOGLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gemini-3.6-flash",
         messages: [
           { role: "system", content: "You are a careful Bible scholar. You always return strict JSON only." },
           { role: "user", content: prompt },

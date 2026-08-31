@@ -10,8 +10,8 @@ serve(async (req) => {
 
   try {
     const { topic, style = "expository", audience = "general", length = "long" } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
+    if (!GOOGLE_API_KEY) throw new Error("GOOGLE_API_KEY is not configured");
 
     const systemPrompt = `You are a seasoned Bible expositor and preacher (a blend of Charles Spurgeon, Tim Keller, Priscilla Shirer and Alistair Begg). You write COMPLETE, PULPIT-READY manuscripts — the kind a preacher can literally read aloud for 45 to 60 minutes — not outlines or summaries.
 
@@ -83,14 +83,14 @@ HARD REQUIREMENTS — a response that misses any of these is a failure:
 
 This must be a full manuscript a preacher could stand and deliver word for word — deeply scriptural, exegetically rich, emotionally moving and practically applicable. Include the opening prayer, the hook, verse-by-verse exposition across 4-5 main points, original language word studies, extensive cross references with full verse text, illustrations, honest objections answered, the connection to Christ, a week of practical steps, the appeal, and the closing prayer and benediction.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${GOOGLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gemini-3.6-flash",
         max_tokens: 32000,
         messages: [
           { role: "system", content: systemPrompt },
