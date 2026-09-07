@@ -55,6 +55,9 @@
     --font-body: 'Manrope', system-ui, sans-serif;
   }
 
+  body {
+    overflow: hidden;
+  }
   .dark {
     --background: 28 18% 9%;
     --foreground: 40 22% 90%;
