@@ -42,7 +42,7 @@ registerNotificationWorker().then(async () => {
   await mergeOutboxIntoInbox();
 
   // Browser-driven wake-ups while the PWA is fully closed (Chromium).
-  void registerPeriodicSync();
+  await registerPeriodicSync();
   // Keep timing exact while a tab is open even if worker timers are reaped.
   startReminderTicker();
 

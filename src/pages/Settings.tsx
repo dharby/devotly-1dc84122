@@ -273,7 +273,7 @@ const Settings = () => {
               className="w-full rounded-xl"
               onClick={async () => {
                 await signOut();
-                navigate("/auth");
+                navigate("/");
               }}
             >
               <LogOut className="h-4 w-4 mr-2" /> Sign Out
