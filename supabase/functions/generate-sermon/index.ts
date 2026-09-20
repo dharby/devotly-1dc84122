@@ -5,6 +5,60 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const AI_API_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+const AI_MODEL = "gemini-3.6-flash";
+const REQUEST_TIMEOUT_MS = 180000;
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 2000;
+const MAX_TOKENS = 16000;
+
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs: number): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function callAIWithRetry(body: unknown, attempt = 0): Promise<Response> {
+  const GOOGLE_API_KEY = Deno.env.get("GOOGLE_API_KEY");
+  if (!GOOGLE_API_KEY) throw new Error("GOOGLE_API_KEY is not configured");
+
+  const response = await fetchWithTimeout(AI_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${GOOGLE_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  }, REQUEST_TIMEOUT_MS);
+
+  if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error("RATE_LIMITED");
+    }
+    if (response.status === 402) {
+      throw new Error("CREDITS_EXHAUSTED");
+    }
+    if (response.status >= 500 && attempt < MAX_RETRIES) {
+      await new Promise(r => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+      return callAIWithRetry(body, attempt + 1);
+    }
+    const t = await response.text();
+    console.error("AI gateway error:", response.status, t);
+    throw new Error("AI_GATEWAY_ERROR");
+  }
+  
+  return response;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -72,7 +126,7 @@ Return ONLY valid JSON with this exact structure:
 }
 
 HARD REQUIREMENTS — a response that misses any of these is a failure:
-- The full manuscript must be long enough to preach for 45-60 minutes: aim for 6,000-8,000 words of actual content.
+- The full manuscript must be long enough to preach for 45-60 minutes: aim for 4,000-6,000 words of actual content.
 - EXACTLY 4 to 5 main points, each with the full exposition, BOTH illustrations, objection, supporting verses, application and transition.
 - AT LEAST 6 word studies, 8 cross references (FULL verse text), 3 quotes, 7 practical steps (a full week), 6 personal study questions, 6 group discussion questions, 6 prayer points, 4 worship suggestions, 4 further study items.
 - Quote scripture in full — never say "see verse 3", write it out.
@@ -83,37 +137,14 @@ HARD REQUIREMENTS — a response that misses any of these is a failure:
 
 This must be a full manuscript a preacher could stand and deliver word for word — deeply scriptural, exegetically rich, emotionally moving and practically applicable. Include the opening prayer, the hook, verse-by-verse exposition across 4-5 main points, original language word studies, extensive cross references with full verse text, illustrations, honest objections answered, the connection to Christ, a week of practical steps, the appeal, and the closing prayer and benediction.`;
 
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${GOOGLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gemini-3.6-flash",
-        max_tokens: 32000,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-      }),
+    const response = await callAIWithRetry({
+      model: AI_MODEL,
+      max_tokens: MAX_TOKENS,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
     });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      throw new Error("AI gateway error");
-    }
 
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content || "";
@@ -123,7 +154,6 @@ This must be a full manuscript a preacher could stand and deliver word for word 
     try {
       sermon = JSON.parse(content);
     } catch {
-      // Recover from a truncated or wrapped JSON payload.
       const start = content.indexOf("{");
       const end = content.lastIndexOf("}");
       if (start === -1 || end <= start) throw new Error("The sermon came back malformed. Please try again.");
@@ -135,8 +165,31 @@ This must be a full manuscript a preacher could stand and deliver word for word 
     });
   } catch (e) {
     console.error("generate-sermon error:", e);
+    const message = e instanceof Error ? e.message : "Unknown error";
+    
+    if (message === "RATE_LIMITED") {
+      return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (message === "CREDITS_EXHAUSTED") {
+      return new Response(JSON.stringify({ error: "AI credits exhausted. Please add funds." }), {
+        status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (message === "AI_GATEWAY_ERROR") {
+      return new Response(JSON.stringify({ error: "AI service temporarily unavailable. Please try again." }), {
+        status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (message.includes("timeout") || message.includes("abort")) {
+      return new Response(JSON.stringify({ error: "Request timed out. The sermon is very long; try a more specific passage." }), {
+        status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ error: message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

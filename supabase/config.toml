@@ -2,12 +2,20 @@ project_id = "iqculanjeijiqenzsvhc"
 
 [functions.generate-devotional]
 verify_jwt = false
+timeout = 180
 
 [functions.generate-sermon]
 verify_jwt = false
+timeout = 180
+
+[functions.daily-word]
+verify_jwt = false
+timeout = 60
 
 [functions.define-word]
 verify_jwt = false
+timeout = 60
 
 [functions.find-scripture]
 verify_jwt = false
+timeout = 60
