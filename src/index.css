@@ -56,7 +56,7 @@
   }
 
   body {
-    overflow: hidden;
+    overflow: auto;
   }
   .dark {
     --background: 28 18% 9%;
