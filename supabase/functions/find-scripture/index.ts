@@ -100,9 +100,36 @@ Respond with ONLY valid JSON, no markdown fences:
     try {
       parsed = JSON.parse(raw);
     } catch {
-      const start = raw.indexOf("{");
-      const end = raw.lastIndexOf("}");
-      parsed = start >= 0 && end > start ? JSON.parse(raw.slice(start, end + 1)) : { summary: "", results: [] };
+      let clean = raw;
+      // Strip any remaining markdown code fences
+      clean = clean.replace(/```json/gi, "").replace(/```/g, "");
+      // Try to find JSON object boundaries
+      let start = clean.indexOf("{");
+      let end = clean.lastIndexOf("}");
+      if (start === -1) {
+        // Try searching for { after newlines
+        const lines = clean.split("\n");
+        for (const line of lines) {
+          const idx = line.indexOf("{");
+          if (idx !== -1) { start = idx; break; }
+        }
+      }
+      if (end === -1) {
+        const lines = clean.split("\n").reverse();
+        for (const line of lines) {
+          const idx = line.lastIndexOf("}");
+          if (idx !== -1) { end = idx; break; }
+        }
+      }
+      if (start !== -1 && end > start) {
+        try {
+          parsed = JSON.parse(raw.slice(start, end + 1));
+        } catch {
+          parsed = { summary: "", results: [] };
+        }
+      } else {
+        parsed = { summary: "", results: [] };
+      }
     }
 
     return new Response(JSON.stringify(parsed), {

@@ -107,7 +107,51 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.`;
     
     content = content.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
     
-    const devotional = JSON.parse(content);
+    let devotional;
+    try {
+      devotional = JSON.parse(content);
+    } catch {
+      let clean = content;
+      // Strip any remaining markdown code fences
+      clean = clean.replace(/```json/gi, "").replace(/```/g, "");
+      // Try to find JSON object boundaries
+      let start = clean.indexOf("{");
+      let end = clean.lastIndexOf("}");
+      if (start === -1) {
+        // Try searching for { after newlines
+        const lines = clean.split("\n");
+        for (const line of lines) {
+          const idx = line.indexOf("{");
+          if (idx !== -1) { start = idx; break; }
+        }
+      }
+      if (end === -1) {
+        const lines = clean.split("\n").reverse();
+        for (const line of lines) {
+          const idx = line.lastIndexOf("}");
+          if (idx !== -1) { end = idx; break; }
+        }
+      }
+      if (start !== -1 && end > start) {
+        try {
+          devotional = JSON.parse(content.slice(start, end + 1));
+        } catch {
+          // Last resort: extract key fields manually
+          devotional = {
+            title: "",
+            scripture: "",
+            scriptureReference: "",
+            translations: [],
+            greekLatinInsights: "",
+            reflection: "",
+            prayer: "",
+            declaration: ""
+          };
+        }
+      } else {
+        throw new Error("AI returned unparseable content. Please try again with a different topic.");
+      }
+    }
 
     return new Response(JSON.stringify(devotional), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

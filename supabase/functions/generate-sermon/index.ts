@@ -154,10 +154,69 @@ This must be a full manuscript a preacher could stand and deliver word for word 
     try {
       sermon = JSON.parse(content);
     } catch {
-      const start = content.indexOf("{");
-      const end = content.lastIndexOf("}");
-      if (start === -1 || end <= start) throw new Error("The sermon came back malformed. Please try again.");
-      sermon = JSON.parse(content.slice(start, end + 1));
+      let clean = content;
+      // Strip any remaining markdown code fences
+      clean = clean.replace(/```json/gi, "").replace(/```/g, "");
+      // Try to find JSON object boundaries
+      let start = clean.indexOf("{");
+      let end = clean.lastIndexOf("}");
+      if (start === -1) {
+        // Try searching for { after newlines
+        const lines = clean.split("\n");
+        for (const line of lines) {
+          const idx = line.indexOf("{");
+          if (idx !== -1) { start = idx; break; }
+        }
+      }
+      if (end === -1) {
+        const lines = clean.split("\n").reverse();
+        for (const line of lines) {
+          const idx = line.lastIndexOf("}");
+          if (idx !== -1) { end = idx; break; }
+        }
+      }
+      if (start !== -1 && end > start) {
+        try {
+          sermon = JSON.parse(content.slice(start, end + 1));
+        } catch {
+          // Return minimal valid sermon structure
+          sermon = {
+            title: "",
+            subtitle: "",
+            seriesNote: "",
+            estimatedDuration: "",
+            mainScripture: "",
+            mainScriptureReference: "",
+            bigIdea: "",
+            sermonInOneSentence: "",
+            openingPrayer: "",
+            hook: "",
+            introduction: "",
+            roadmap: [],
+            context: { historical: "", literary: "", author: "", canonical: "" },
+            wordStudy: [],
+            points: [],
+            crossReferences: [],
+            theologicalThemes: [],
+            christConnection: "",
+            commonMisunderstandings: "",
+            quotes: [],
+            practicalSteps: [],
+            memoryVerse: { reference: "", text: "" },
+            personalStudyQuestions: [],
+            groupDiscussionQuestions: [],
+            prayerPoints: [],
+            worshipSuggestions: [],
+            deliveryNotes: "",
+            callToAction: "",
+            closingPrayer: "",
+            benediction: "",
+            furtherStudy: []
+          };
+        }
+      } else {
+        throw new Error("The sermon came back malformed. Please try again.");
+      }
     }
 
     return new Response(JSON.stringify(sermon), {
