@@ -6,7 +6,9 @@ const corsHeaders = {
 };
 
 const AI_API_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
-const AI_MODEL = "gemini-3.6-flash";
+
+// Model configuration - read from environment variable, fallback to default
+const MODEL = Deno.env.get("AI_MODEL") || "gemini-3.5-flash";
 const REQUEST_TIMEOUT_MS = 30000;
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
