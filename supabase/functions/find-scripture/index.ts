@@ -73,7 +73,7 @@ serve(async (req) => {
     }
 
     const response = await callAIWithRetry({
-      model: AI_MODEL,
+      model: MODEL,
       messages: [
         {
           role: "system",

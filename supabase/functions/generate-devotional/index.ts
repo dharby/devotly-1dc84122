@@ -97,7 +97,7 @@ CRITICAL: Return ONLY valid JSON. No markdown, no code blocks, no extra text.`;
     const userPrompt = `Generate an extensive devotional on the topic of "${topic}" with a "${tone}" tone, using the ${translation} Bible translation${extras.length ? ` and also providing the main verse in: ${extras.join(", ")}` : ""}. Make it deeply insightful with multiple scripture references, relatable stories, Greek/Latin word analysis, and practical life application.`;
 
     const response = await callAIWithRetry({
-      model: AI_MODEL,
+      model: MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },

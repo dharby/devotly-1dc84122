@@ -140,7 +140,7 @@ HARD REQUIREMENTS — a response that misses any of these is a failure:
 This must be a full manuscript a preacher could stand and deliver word for word — deeply scriptural, exegetically rich, emotionally moving and practically applicable. Include the opening prayer, the hook, verse-by-verse exposition across 4-5 main points, original language word studies, extensive cross references with full verse text, illustrations, honest objections answered, the connection to Christ, a week of practical steps, the appeal, and the closing prayer and benediction.`;
 
     const response = await callAIWithRetry({
-      model: AI_MODEL,
+      model: MODEL,
       max_tokens: MAX_TOKENS,
       messages: [
         { role: "system", content: systemPrompt },
