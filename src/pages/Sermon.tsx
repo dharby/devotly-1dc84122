@@ -108,6 +108,7 @@ export default function Sermon() {
   const [loading, setLoading] = useState(false);
   const [showLibrary, setShowLibrary] = useState(false);
   const [libQuery, setLibQuery] = useState("");
+  const [lastGeneration, setLastGeneration] = useState(0);
 
   useEffect(() => {
     if (searchParams.get("auto") === "1" && searchParams.get("topic") && !active && !loading) {
@@ -129,6 +130,10 @@ export default function Sermon() {
 
   const generate = async () => {
     if (!topic.trim()) return;
+    if (Date.now() - lastGeneration < 3000) {
+      toast.error("Please wait a moment between generations.");
+      return;
+    }
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-sermon", {
@@ -148,6 +153,7 @@ export default function Sermon() {
       toast.error(e.message || "Failed to generate sermon");
     } finally {
       setLoading(false);
+      setLastGeneration(Date.now());
     }
   };
 
@@ -368,7 +374,7 @@ export default function Sermon() {
               size="lg"
               className="w-full text-base rounded-xl h-12"
               onClick={generate}
-              disabled={!topic.trim() || loading}
+              disabled={!topic.trim() || loading || Date.now() - lastGeneration < 3000}
             >
               {loading ? (
                 <><RefreshCw className="h-4 w-4 animate-spin mr-2" /> Preparing the sermon...</>

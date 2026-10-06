@@ -36,10 +36,15 @@ const ScriptureSearch = () => {
   const [summary, setSummary] = useState("");
   const [results, setResults] = useState<ScriptureResult[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
+  const [lastGeneration, setLastGeneration] = useState(0);
 
   const search = async (q?: string) => {
     const term = (q ?? query).trim();
     if (term.length < 2) { toast.error("Type a phrase or idea first"); return; }
+    if (Date.now() - lastGeneration < 3000) {
+      toast.error("Please wait a moment between searches.");
+      return;
+    }
     setQuery(term);
     setLoading(true);
     setResults([]);
@@ -55,6 +60,7 @@ const ScriptureSearch = () => {
       toast.error(e instanceof Error ? e.message : "Search failed");
     } finally {
       setLoading(false);
+      setLastGeneration(Date.now());
     }
   };
 
@@ -91,7 +97,11 @@ const ScriptureSearch = () => {
           />
         </div>
 
-        <Button className="w-full rounded-xl" onClick={() => search()} disabled={loading}>
+        <Button
+              className="w-full rounded-xl"
+              onClick={() => search()}
+              disabled={loading || Date.now() - lastGeneration < 3000}
+            >
           {loading ? (
             <><Sparkles className="h-4 w-4 mr-2 animate-pulse" /> Searching Scripture…</>
           ) : (

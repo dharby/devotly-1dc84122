@@ -36,10 +36,15 @@ const GenerateDevotional = () => {
   };
   const [devotional, setDevotional] = useState<Devotional | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [lastGeneration, setLastGeneration] = useState(0);
   const { saveDevotional } = useDevotionals();
 
   const handleGenerate = async () => {
     if (!topic.trim()) return;
+    if (Date.now() - lastGeneration < 3000) {
+      toast.error("Please wait a moment between generations.");
+      return;
+    }
     setIsGenerating(true);
     try {
       const { data, error } = await supabase.functions.invoke("generate-devotional", {
@@ -72,6 +77,7 @@ const GenerateDevotional = () => {
       toast.error(msg);
     } finally {
       setIsGenerating(false);
+      setLastGeneration(Date.now());
     }
   };
 
@@ -163,7 +169,13 @@ const GenerateDevotional = () => {
             </motion.div>
 
             <motion.div variants={{ initial: { opacity: 0, y: 10 }, animate: { opacity: 1, y: 0 } }}>
-              <Button variant="golden" size="lg" className="w-full text-base rounded-xl h-12" onClick={handleGenerate} disabled={!topic.trim() || isGenerating}>
+              <Button
+      variant="golden"
+      size="lg"
+      className="w-full text-base rounded-xl h-12"
+      onClick={handleGenerate}
+      disabled={!topic.trim() || isGenerating || Date.now() - lastGeneration < 3000}
+    >
                 {isGenerating ? (
                   <>
                     <RefreshCw className="h-4 w-4 animate-spin mr-2" />
